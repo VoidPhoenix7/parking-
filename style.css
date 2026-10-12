@@ -2485,7 +2485,51 @@ body {
   }
 }
 
-/* TIME PICKER COMBO: MANUAL TYPING + CLOCK ICON PICKER */
+/* BOOKING FORM CONTROLS: COLORED LINES & COMFORTABLE PADDING (NO COLOR INSIDE) */
+#bookingForm .form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+#bookingForm label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+#bookingForm .form-control {
+  width: 100%;
+  height: 48px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: #0f172a;
+  background-color: #ffffff !important; /* Pure white inside - no background fill */
+  border: 1.5px solid #2563eb;          /* Clean, vibrant colored border lines */
+  border-radius: var(--radius-sm);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#bookingForm .form-control:hover {
+  border-color: #1d4ed8;
+}
+
+#bookingForm .form-control:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  background-color: #ffffff !important;
+}
+
+#bookingForm .form-control::placeholder {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* TIME PICKER COMBO: MANUAL TYPING + CLOCK ICON FITTING INSIDE THE BOX */
 .time-picker-wrapper {
   position: relative;
   display: flex;
@@ -2495,40 +2539,39 @@ body {
 
 .time-text-input {
   width: 100%;
-  padding-right: 48px !important;
+  padding-right: 44px !important;
   font-size: 0.95rem;
   letter-spacing: 0.3px;
-  background-color: #ffffff;
+  background-color: #ffffff !important;
 }
 
 .clock-symbol-wrapper {
   position: absolute;
-  right: 6px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.15s ease;
   overflow: hidden;
   z-index: 2;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
 }
 
 .clock-symbol-wrapper:hover {
-  background: #e2e8f0;
-  border-color: var(--color-blue);
-  transform: translateY(-50%) scale(1.05);
+  background: rgba(37, 99, 235, 0.08);
+  transform: translateY(-50%) scale(1.06);
 }
 
 .clock-symbol-icon {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   line-height: 1;
   pointer-events: none;
   user-select: none;
