@@ -9,6 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Leaflet Interactive Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body>
 
@@ -92,70 +95,25 @@
       </div>
     </div>
 
-    <!-- 4. PUDUCHERRY CITY MAP (CSS / HTML Map) -->
+    <!-- 4. PUDUCHERRY CITY MAP (LEAFLET & OPENSTREETMAP) -->
     <div class="map-section-wrapper">
       <div class="map-header">
         <div>
-          <h3 class="map-title">📍 Puducherry City Parking Map</h3>
-          <p class="map-subtitle">Click any marker to jump to its parking details</p>
+          <h3 class="map-title">📍 Puducherry City Interactive Parking Map</h3>
+          <p class="map-subtitle">Powered by Leaflet & OpenStreetMap — Click any marker for demo slots and direct reservation</p>
         </div>
         <div class="map-legend">
           <span class="legend-item"><span class="marker-dot marker-green"></span> Lots Available</span>
-          <span class="legend-item"><span class="marker-dot marker-yellow"></span> Limited</span>
-          <span class="legend-item"><span class="marker-dot marker-red"></span> Full</span>
+          <span class="legend-item"><span class="marker-dot marker-yellow"></span> Limited (≤10)</span>
+          <span class="legend-item"><span class="marker-dot marker-red"></span> Full (0)</span>
+          <span class="legend-item legend-divider"></span>
+          <span class="legend-item"><span class="badge-legend-rt">🟢 Real-Time (3)</span></span>
+          <span class="legend-item"><span class="badge-legend-demo">🏷️ Demo Sample (3)</span></span>
         </div>
       </div>
 
-      <!-- Fake Interactive Map -->
-      <div class="fake-map" id="fakeMap">
-        <!-- Bay of Bengal Coastline -->
-        <div class="map-sea">
-          <span class="sea-label">🌊 Bay of Bengal</span>
-        </div>
-
-        <!-- Major Road guides -->
-        <div class="road road-h-1"><span>Goubert Avenue / Promenade Beach</span></div>
-        <div class="road road-h-2"><span>Mahatma Gandhi Road</span></div>
-        <div class="road road-v-1"><span>Mission Street</span></div>
-        <div class="road road-v-2"><span>Bussy Street</span></div>
-
-        <!-- 6 Interactive Location Markers -->
-        <!-- 1. White Town -->
-        <div class="map-pin pin-1" onclick="focusParkingCard('PK-1')" title="White Town Parking">
-          <span class="pin-badge marker-green">32</span>
-          <span class="pin-label">White Town</span>
-        </div>
-
-        <!-- 2. Heritage Town -->
-        <div class="map-pin pin-2" onclick="focusParkingCard('PK-2')" title="Heritage Town Parking">
-          <span class="pin-badge marker-yellow">8</span>
-          <span class="pin-label">Heritage Town</span>
-        </div>
-
-        <!-- 3. MG Road -->
-        <div class="map-pin pin-3" onclick="focusParkingCard('PK-3')" title="MG Road Parking">
-          <span class="pin-badge marker-green">45</span>
-          <span class="pin-label">MG Road</span>
-        </div>
-
-        <!-- 4. Mission Street -->
-        <div class="map-pin pin-4" onclick="focusParkingCard('PK-4')" title="Mission Street Parking">
-          <span class="pin-badge marker-red">0</span>
-          <span class="pin-label">Mission Street</span>
-        </div>
-
-        <!-- 5. Muthialpet -->
-        <div class="map-pin pin-5" onclick="focusParkingCard('PK-5')" title="Muthialpet Parking">
-          <span class="pin-badge marker-green">22</span>
-          <span class="pin-label">Muthialpet</span>
-        </div>
-
-        <!-- 6. Lawspet -->
-        <div class="map-pin pin-6" onclick="focusParkingCard('PK-6')" title="Lawspet Parking">
-          <span class="pin-badge marker-yellow">6</span>
-          <span class="pin-label">Lawspet</span>
-        </div>
-      </div>
+      <!-- Real Interactive Leaflet OpenStreetMap Container -->
+      <div id="parkingMap" class="leaflet-parking-map"></div>
     </div>
 
     <!-- 5. PARKING CARDS SECTION -->
