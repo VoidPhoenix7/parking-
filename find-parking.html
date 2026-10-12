@@ -62,14 +62,14 @@
     <div class="controls-card">
       <!-- Search Input -->
       <div class="search-box-wrapper">
-        <span class="search-icon">ðŸ”</span>
+        <span class="search-icon">🔍</span>
         <input 
           type="text" 
           id="searchInput" 
           placeholder="Search parking location (e.g. White Town, MG Road)..." 
           autocomplete="off"
         />
-        <button id="clearSearchBtn" class="clear-btn" title="Clear search">âœ•</button>
+        <button id="clearSearchBtn" class="clear-btn" title="Clear search">✕</button>
       </div>
 
       <!-- Filter Buttons -->
@@ -92,8 +92,8 @@
     <div class="map-section-wrapper">
       <div class="map-header">
         <div>
-          <h3 class="map-title">ðŸ“ Puducherry City Interactive Parking Map</h3>
-          <p class="map-subtitle">Powered by Leaflet & OpenStreetMap â€” Click any marker for slot availability and reservation</p>
+          <h3 class="map-title">📍 Puducherry City Interactive Parking Map</h3>
+          <p class="map-subtitle">Powered by Leaflet & OpenStreetMap — Click any marker for slot availability and reservation</p>
         </div>
         <div class="map-legend">
           <span class="legend-item"><span class="marker-dot marker-green"></span> Available</span>
@@ -126,7 +126,7 @@
 
     <!-- Empty state message if search finds nothing -->
     <div id="noResultsMsg" class="no-results hidden">
-      <div class="no-results-icon">ðŸ”Ž</div>
+      <div class="no-results-icon">🔍Ž</div>
       <h3>No Parking Locations Found</h3>
       <p>Try searching for a different area like "White Town" or change your filter.</p>
     </div>
@@ -141,7 +141,7 @@
           <span class="modal-badge">Parking Location Details</span>
           <h3 id="modalName">Parking Details</h3>
         </div>
-        <button class="modal-close" onclick="closeModal()" aria-label="Close dialog">âœ•</button>
+        <button class="modal-close" onclick="closeModal()" aria-label="Close dialog">✕</button>
       </div>
       <div class="modal-body" id="modalBody">
         <!-- Content inserted dynamically with proper address and two/four-wheeler rates -->
@@ -162,7 +162,7 @@
           <span class="modal-badge">Instant Reservation</span>
           <h3 id="bookingModalTitle">Book a Parking Slot</h3>
         </div>
-        <button class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">âœ•</button>
+        <button class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form id="bookingForm" onsubmit="handleBookingFormSubmit(event)">
@@ -176,11 +176,11 @@
               <h4 id="bookParkingName">White Town Parking</h4>
               <span class="bloc-badge" id="bookParkingStatus">OPEN</span>
             </div>
-            <p class="bloc-address" id="bookParkingAddress">ðŸ“ Location address</p>
+            <p class="bloc-address" id="bookParkingAddress">📍 Location address</p>
             <div class="bloc-meta">
-              <span>ðŸ•’ <strong>Hours:</strong> <span id="bookParkingTimings">06:00 AM - 11:00 PM</span></span>
+              <span>🕒 <strong>Hours:</strong> <span id="bookParkingTimings">06:00 AM - 11:00 PM</span></span>
               <span>ðŸ…¿ï¸ <strong>Available Right Now:</strong> <span id="bookParkingCurrentAvail" class="color-green">0</span></span>
-              <span>ðŸ’° <strong>Hourly Rate:</strong> â‚¹<span id="bookParkingHourlyRate">20</span>/hr</span>
+              <span>💰 <strong>Hourly Rate:</strong> â‚¹<span id="bookParkingHourlyRate">20</span>/hr</span>
             </div>
           </div>
 
@@ -221,7 +221,7 @@
               <div class="time-picker-wrapper">
                 <input type="text" id="bookArrivalTime" class="form-control time-text-input" placeholder="e.g. 23:00 or 11:00 PM" autocomplete="off" required />
                 <div class="clock-symbol-wrapper" title="Click clock symbol to select time" onclick="triggerClockPicker('bookArrivalTime', 'bookArrivalTimePicker')">
-                  <span class="clock-symbol-icon">ðŸ•’</span>
+                  <span class="clock-symbol-icon">🕒</span>
                   <input type="time" id="bookArrivalTimePicker" class="native-clock-overlay" tabindex="-1" />
                 </div>
               </div>
@@ -233,7 +233,7 @@
               <div class="time-picker-wrapper">
                 <input type="text" id="bookDepartureTime" class="form-control time-text-input" placeholder="e.g. 01:30 or 01:30 AM" autocomplete="off" required />
                 <div class="clock-symbol-wrapper" title="Click clock symbol to select time" onclick="triggerClockPicker('bookDepartureTime', 'bookDepartureTimePicker')">
-                  <span class="clock-symbol-icon">ðŸ•’</span>
+                  <span class="clock-symbol-icon">🕒</span>
                   <input type="time" id="bookDepartureTimePicker" class="native-clock-overlay" tabindex="-1" />
                 </div>
               </div>
@@ -348,7 +348,7 @@
 
       <div class="modal-footer" style="flex-wrap: wrap; justify-content: center; gap: 10px;">
         <a href="my-bookings.html" class="btn btn-primary" style="flex: 1; min-width: 160px; text-align: center;">
-          ðŸ“‹ View in My Bookings
+          📋 View in My Bookings
         </a>
         <button type="button" class="btn btn-outline" onclick="closeBookingSuccessModal()" style="flex: 1; min-width: 140px;">
           Close
