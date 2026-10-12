@@ -1,0 +1,249 @@
+{
+  "parking": [
+    {
+      "id": "PK-1",
+      "name": "White Town Parking",
+      "location": "Rue Romain Rolland, Near Promenade Beach, White Town, Puducherry - 605001",
+      "totalSpaces": 80,
+      "availableSpaces": 36,
+      "twoWheelerPrice": 20,
+      "fourWheelerPrice": 40,
+      "price": 20,
+      "status": "OPEN",
+      "landmark": "Behind French Institute, 2 mins walk to Rock Beach",
+      "timings": "06:00 AM - 11:00 PM (All Days)",
+      "managedBy": "Puducherry Traffic Police & Municipality"
+    },
+    {
+      "id": "PK-2",
+      "name": "Heritage Town Parking",
+      "location": "Vysial Street, Near Sri Manakula Vinayagar Temple, Heritage Town, Puducherry - 605001",
+      "totalSpaces": 50,
+      "availableSpaces": 1,
+      "twoWheelerPrice": 15,
+      "fourWheelerPrice": 30,
+      "price": 15,
+      "status": "OPEN",
+      "landmark": "Opposite Calve College High School",
+      "timings": "07:00 AM - 10:00 PM",
+      "managedBy": "Puducherry Smart City Development Ltd"
+    },
+    {
+      "id": "PK-3",
+      "name": "MG Road Parking",
+      "location": "Mahatma Gandhi Road, Near Rangapillai Street Junction, Puducherry - 605001",
+      "totalSpaces": 100,
+      "availableSpaces": 51,
+      "twoWheelerPrice": 30,
+      "fourWheelerPrice": 50,
+      "price": 30,
+      "status": "OPEN",
+      "landmark": "Near Goubert Market Commercial Complex",
+      "timings": "24 Hours (Round the Clock)",
+      "managedBy": "Traffic Police Enforcement Wing"
+    },
+    {
+      "id": "PK-4",
+      "name": "Mission Street Parking",
+      "location": "Mission Street, Opposite Immaculate Conception Cathedral, Puducherry - 605001",
+      "totalSpaces": 60,
+      "availableSpaces": 0,
+      "twoWheelerPrice": 20,
+      "fourWheelerPrice": 40,
+      "price": 20,
+      "status": "OPEN",
+      "landmark": "Near Cathedral School Crossing",
+      "timings": "08:00 AM - 10:30 PM",
+      "managedBy": "Puducherry Municipality"
+    },
+    {
+      "id": "PK-5",
+      "name": "Muthialpet Parking",
+      "location": "Mahatma Gandhi Road North, Muthialpet Clock Tower Junction, Puducherry - 605003",
+      "totalSpaces": 70,
+      "availableSpaces": 25,
+      "twoWheelerPrice": 15,
+      "fourWheelerPrice": 30,
+      "price": 15,
+      "status": "OPEN",
+      "landmark": "Near Muthialpet Police Station",
+      "timings": "07:00 AM - 10:00 PM",
+      "managedBy": "Traffic Police Sub-Division"
+    },
+    {
+      "id": "PK-6",
+      "name": "Lawspet Main Road Parking",
+      "location": "Airport Road, Lawspet, Puducherry - 605008",
+      "totalSpaces": 40,
+      "availableSpaces": 5,
+      "twoWheelerPrice": 15,
+      "fourWheelerPrice": 30,
+      "price": 15,
+      "status": "OPEN",
+      "landmark": "Near Lawspet Post Office & Stadium",
+      "timings": "06:30 AM - 09:30 PM",
+      "managedBy": "Puducherry Smart City"
+    }
+  ],
+  "reports": [
+    {
+      "id": "PS-001",
+      "type": "Illegal Parking",
+      "location": "Mission Street, near Calve College",
+      "vehicleNumber": "PY-01-AB-1234",
+      "description": "Black SUV parked directly on the pedestrian walkway, obstructing elderly pedestrians.",
+      "date": "2026-10-08",
+      "time": "10:30",
+      "photo": "",
+      "status": "Under Review"
+    },
+    {
+      "id": "PS-002",
+      "type": "Double Parking",
+      "location": "Bussy Street Corner, White Town",
+      "vehicleNumber": "PY-01-CD-5678",
+      "description": "Two commercial vans parked side-by-side causing heavy traffic bottleneck for 25 minutes.",
+      "date": "2026-10-09",
+      "time": "11:15",
+      "photo": "",
+      "status": "Resolved"
+    },
+    {
+      "id": "PS-003",
+      "type": "Road Obstruction",
+      "location": "Goubert Avenue, Promenade Beach",
+      "vehicleNumber": "TN-32-EF-9012",
+      "description": "Delivery truck parked blocking access road to Rock Beach promenade.",
+      "date": "2026-10-10",
+      "time": "16:45",
+      "photo": "",
+      "status": "Submitted"
+    },
+    {
+      "id": "PS-004",
+      "type": "No Parking",
+      "location": "Rangapillai Street, Heritage Town",
+      "vehicleNumber": "PY-01-GH-3456",
+      "description": "Sedan left in clearly marked Yellow No-Parking Zone near municipal hospital.",
+      "date": "2026-10-11",
+      "time": "09:20",
+      "photo": "",
+      "status": "Rejected"
+    }
+  ],
+  "traffic": [
+    {
+      "area": "White Town",
+      "trafficLevel": "High",
+      "parkingAvailability": "Medium",
+      "reportsCount": 6
+    },
+    {
+      "area": "Mission Street",
+      "trafficLevel": "Medium",
+      "parkingAvailability": "Low",
+      "reportsCount": 4
+    },
+    {
+      "area": "MG Road",
+      "trafficLevel": "High",
+      "parkingAvailability": "Medium",
+      "reportsCount": 8
+    },
+    {
+      "area": "Heritage Town",
+      "trafficLevel": "Medium",
+      "parkingAvailability": "High",
+      "reportsCount": 3
+    },
+    {
+      "area": "Lawspet",
+      "trafficLevel": "Low",
+      "parkingAvailability": "Medium",
+      "reportsCount": 1
+    },
+    {
+      "area": "Beach Road",
+      "trafficLevel": "High",
+      "parkingAvailability": "High",
+      "reportsCount": 5
+    }
+  ],
+  "users": [
+    {
+      "id": "USR-101",
+      "name": "Arun Kumar",
+      "email": "arun.k@smartpark.in",
+      "role": "Citizen",
+      "phone": "9876543210",
+      "joined": "2026-09-12"
+    },
+    {
+      "id": "USR-102",
+      "name": "Priya Sundaram",
+      "email": "priya.s@smartpark.in",
+      "role": "Citizen",
+      "phone": "9845123456",
+      "joined": "2026-09-20"
+    },
+    {
+      "id": "USR-103",
+      "name": "Inspector Vijay",
+      "email": "traffic.police@puducherry.gov.in",
+      "role": "Police",
+      "phone": "9443210987",
+      "joined": "2026-08-15"
+    },
+    {
+      "id": "USR-104",
+      "name": "Muthu Raman",
+      "email": "muthu.admin@puducherry.gov.in",
+      "role": "Admin",
+      "phone": "9487654321",
+      "joined": "2026-07-01"
+    },
+    {
+      "id": "USR-105",
+      "name": "Ananya Deshmukh",
+      "email": "ananya.d@gmail.com",
+      "role": "Citizen",
+      "phone": "9789012345",
+      "joined": "2026-10-02"
+    }
+  ],
+  "policeAccounts": [
+    {
+      "id": "POL-101",
+      "name": "Inspector Vijay",
+      "email": "traffic.police@puducherry.gov.in",
+      "password": "police1234"
+    },
+    {
+      "id": "POL-102",
+      "name": "SI Ramesh Kumar",
+      "email": "ramesh.police@puducherry.gov.in",
+      "password": "police1234"
+    }
+  ],
+  "adminAccounts": [
+    {
+      "id": "ADM-201",
+      "name": "Muthu Raman",
+      "email": "muthu.admin@puducherry.gov.in",
+      "password": "admin1234"
+    },
+    {
+      "id": "ADM-202",
+      "name": "Municipal Commissioner",
+      "email": "admin@puducherry.gov.in",
+      "password": "admin1234"
+    }
+  ],
+  "profile": {
+    "name": "",
+    "dob": "",
+    "email": "",
+    "phone": "",
+    "city": "Puducherry"
+  }
+}

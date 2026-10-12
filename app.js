@@ -193,8 +193,41 @@ const SAMPLE_INITIAL_REPORTS = [
 ];
 
 /* =========================================================
-   1. LOCALSTORAGE INITIALIZATION
+   1. LOCALSTORAGE & DYNAMIC REST API SYNC
+   - Bi-directional sync with Node.js dynamic backend
+   - Real-time persistence to database.json
+   - Resilient fallback to LocalStorage if offline
    ========================================================= */
+const API_BASE = window.location.origin;
+
+async function syncWithDynamicBackend() {
+  try {
+    const res = await fetch(`${API_BASE}/api/data`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.parking && data.parking.length > 0) {
+        localStorage.setItem(PARKING_STORAGE_KEY, JSON.stringify(data.parking));
+      }
+      if (data.reports && data.reports.length > 0) {
+        localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(data.reports));
+      }
+      if (data.traffic && data.traffic.length > 0) {
+        localStorage.setItem(TRAFFIC_STORAGE_KEY, JSON.stringify(data.traffic));
+      }
+      if (data.users && data.users.length > 0) {
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(data.users));
+      }
+      if (data.profile) {
+        localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(data.profile));
+      }
+      return true;
+    }
+  } catch (err) {
+    // Running statically or offline, fallback to LocalStorage seamlessly
+  }
+  return false;
+}
+
 function initLocalStorage() {
   if (!localStorage.getItem(PARKING_STORAGE_KEY)) {
     localStorage.setItem(PARKING_STORAGE_KEY, JSON.stringify(SAMPLE_PARKING_LIST));
@@ -211,6 +244,9 @@ function initLocalStorage() {
   if (!localStorage.getItem(ADMIN_ACCOUNTS_KEY)) {
     localStorage.setItem(ADMIN_ACCOUNTS_KEY, JSON.stringify(DEFAULT_ADMIN_ACCOUNTS));
   }
+
+  // Background sync from server
+  syncWithDynamicBackend();
 }
 
 function getReports() {
@@ -224,6 +260,14 @@ function getReports() {
 
 function saveReports(reportsList) {
   localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reportsList));
+  // Async sync to server
+  try {
+    fetch(`${API_BASE}/api/reports`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reportsList[0] || {})
+    }).catch(() => {});
+  } catch (e) {}
 }
 
 function getParkingData() {
@@ -238,6 +282,7 @@ function getParkingData() {
 function saveParkingData(parkingList) {
   localStorage.setItem(PARKING_STORAGE_KEY, JSON.stringify(parkingList));
 }
+
 
 /* =========================================================
    USER PROFILE MANAGEMENT (LocalStorage)
