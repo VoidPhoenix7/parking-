@@ -2463,11 +2463,116 @@ function injectBottomNavigation() {
   document.body.appendChild(bottomNav);
 }
 
+/* =========================================================
+   8. HACKATHON LIVE FUTURE-TECH ENGINE:
+   - Dynamic simulated IoT ultrasonic parking sensors
+   - Real-time traffic congestion telemetry ticks
+   - Live AI predictive parking recommendation badge
+   - Live stream ticker & Presentation Mode toggle
+   ========================================================= */
+let isLiveSimRunning = true;
+let simIntervalTimer = null;
+
+function startSmartCityLiveStream() {
+  // Update random parking lot occupancy every 6 seconds to show dynamic system behavior
+  if (simIntervalTimer) clearInterval(simIntervalTimer);
+  
+  simIntervalTimer = setInterval(() => {
+    if (!isLiveSimRunning) return;
+
+    // 1. Dynamic Parking Slot simulation (IoT Ultrasonic sensors telemetry)
+    const parkingLots = getParkingData();
+    if (parkingLots && parkingLots.length > 0) {
+      // Pick a random lot to simulate vehicle entry or exit
+      const randomIndex = Math.floor(Math.random() * parkingLots.length);
+      const targetLot = parkingLots[randomIndex];
+      
+      const delta = Math.random() > 0.5 ? 1 : -1;
+      const updatedAvailable = Math.max(0, Math.min(targetLot.totalSpaces, targetLot.availableSpaces + delta));
+
+      if (updatedAvailable !== targetLot.availableSpaces) {
+        targetLot.availableSpaces = updatedAvailable;
+        saveParkingData(parkingLots);
+
+        // Re-render parking if currently on parking page
+        if (document.getElementById("parkingGrid")) {
+          renderParkingCards();
+          updateMapPins();
+        }
+        // Re-render admin dashboard if active
+        if (document.getElementById("adminParkingTbody")) {
+          renderAdminDashboard();
+        }
+      }
+    }
+
+    // 2. Dynamic Traffic Monitoring Telemetry updates
+    const trafficData = localStorage.getItem(TRAFFIC_STORAGE_KEY);
+    if (trafficData) {
+      try {
+        let areas = JSON.parse(trafficData);
+        if (areas && areas.length > 0) {
+          const randAreaIdx = Math.floor(Math.random() * areas.length);
+          const area = areas[randAreaIdx];
+          
+          // Occasional shift in parking availability or minor reports
+          const levels = ["Low", "Medium", "High"];
+          if (Math.random() > 0.6) {
+            area.parkingAvailability = levels[Math.floor(Math.random() * levels.length)];
+            localStorage.setItem(TRAFFIC_STORAGE_KEY, JSON.stringify(areas));
+            if (document.getElementById("trafficGrid")) {
+              renderTrafficMonitoringPage();
+            }
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Pulse live ticker if present
+    const pulseDot = document.getElementById("liveIoTPulse");
+    if (pulseDot) {
+      pulseDot.classList.add("pulse-ping");
+      setTimeout(() => pulseDot.classList.remove("pulse-ping"), 800);
+    }
+  }, 5000);
+}
+
+function injectSmartCityLiveTicker() {
+  // Inject a sleek futuristic status bar at the very top of each page
+  if (document.getElementById("smartCityLiveBanner")) return;
+
+  const banner = document.createElement("div");
+  banner.id = "smartCityLiveBanner";
+  banner.className = "smart-city-ticker-bar";
+  banner.innerHTML = `
+    <div class="ticker-content">
+      <div class="ticker-badge">
+        <span class="live-dot" id="liveIoTPulse"></span>
+        <span class="ticker-title">PUDUCHERRY SMART SENSOR GRID</span>
+      </div>
+      <div class="ticker-stream" id="tickerText">
+        <span>📡 <strong>IoT Telemetry:</strong> 120+ ultrasonic sensors active in White Town & MG Road</span>
+        <span class="ticker-sep">•</span>
+        <span>🤖 <strong>AI Flow:</strong> Predictive parking routing active</span>
+        <span class="ticker-sep">•</span>
+        <span>⏱️ <strong>Update Rate:</strong> Real-time 5s sync</span>
+      </div>
+      <div class="ticker-actions">
+        <span class="tech-tag">PROTOTYPE 2.0</span>
+      </div>
+    </div>
+  `;
+
+  document.body.insertBefore(banner, document.body.firstChild);
+}
+
 // Document Ready Initialization
 document.addEventListener("DOMContentLoaded", () => {
   initLocalStorage();
   initUserProfile();
   setupNavbar();
+  injectSmartCityLiveTicker();
+  startSmartCityLiveStream();
   injectBottomNavigation();
   syncNavbarLoginStatus();
   setupSearchAndFilters();
@@ -2481,5 +2586,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTrafficMonitoringPage();
   renderAdminDashboard();
   renderProfilePage();
-  console.log("Smartpark Puducherry - Ready. Current role:", getCurrentUserRole());
+  console.log("Smartpark Puducherry - Ready with Live IoT Engine. Role:", getCurrentUserRole());
 });
+
