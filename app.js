@@ -373,6 +373,17 @@ function saveUserProfile(event) {
 
   localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
 
+  // Sync to UsersData in LocalStorage
+  if (profile.email) {
+    const allUsers = getUsersData();
+    const existingIdx = allUsers.findIndex(u => u.email.toLowerCase() === profile.email.toLowerCase());
+    if (existingIdx !== -1) {
+      if (profile.name) allUsers[existingIdx].name = profile.name;
+      if (profile.phone) allUsers[existingIdx].phone = profile.phone;
+      saveUsersData(allUsers);
+    }
+  }
+
   // Update UI Displays
   renderProfilePage();
 
@@ -498,6 +509,36 @@ function handleDefaultLogin(event) {
 
   // Otherwise login as citizen
   setCurrentUserRole("citizen");
+
+  // Save/Update Citizen UserProfileData in LocalStorage
+  let profile = getUserProfile();
+  if (email && (!profile.email || profile.email === "citizen@smartpark.in" || profile.email === "")) {
+    profile.email = email;
+    if (!profile.name) {
+      const derivedName = email.split("@")[0].replace(/[._-]/g, " ");
+      profile.name = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
+    }
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  }
+
+  // Also record this citizen user in UsersData so Admin Dashboard tracks them
+  if (email) {
+    const allUsers = getUsersData();
+    const exists = allUsers.some(u => u.email.toLowerCase() === email.toLowerCase());
+    if (!exists) {
+      const nextNum = allUsers.length + 1;
+      allUsers.push({
+        id: `USR-${100 + nextNum}`,
+        name: profile.name || "Citizen User",
+        email: email,
+        role: "Citizen",
+        phone: profile.phone || "Not specified",
+        joined: new Date().toISOString().split("T")[0]
+      });
+      saveUsersData(allUsers);
+    }
+  }
+
   window.location.href = "profile.html";
 }
 
@@ -1244,6 +1285,9 @@ function renderAdminDashboard() {
   if (totalLotsElem) totalLotsElem.textContent = lots.length;
   if (totalReportsElem) totalReportsElem.textContent = reports.length;
   if (resolvedReportsElem) resolvedReportsElem.textContent = reports.filter(r => r.status === "Resolved").length;
+
+  const manageUsersCountElem = document.getElementById("adminManageUsersCount");
+  if (manageUsersCountElem) manageUsersCountElem.textContent = users.length;
 
   // 2. Manage Parking: Desktop Table & Mobile Cards
   const parkingCards = document.getElementById("adminParkingCards");
