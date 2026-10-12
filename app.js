@@ -72,7 +72,11 @@ const SAMPLE_PARKING_LIST = [
     status: "OPEN",
     landmark: "Behind French Institute, 2 mins walk to Rock Beach",
     timings: "06:00 AM - 11:00 PM (All Days)",
-    managedBy: "Puducherry Traffic Police & Municipality"
+    managedBy: "Puducherry Traffic Police & Municipality",
+    lat: 11.9315,
+    lng: 79.8358,
+    isDemo: false,
+    category: "Real-Time Sensor"
   },
   {
     id: "PK-2",
@@ -86,7 +90,11 @@ const SAMPLE_PARKING_LIST = [
     status: "OPEN",
     landmark: "Opposite Calve College High School",
     timings: "07:00 AM - 10:00 PM",
-    managedBy: "Puducherry Smart City Development Ltd"
+    managedBy: "Puducherry Smart City Development Ltd",
+    lat: 11.9365,
+    lng: 79.8310,
+    isDemo: false,
+    category: "Real-Time Sensor"
   },
   {
     id: "PK-3",
@@ -100,7 +108,11 @@ const SAMPLE_PARKING_LIST = [
     status: "OPEN",
     landmark: "Near Goubert Market Commercial Complex",
     timings: "24 Hours (Round the Clock)",
-    managedBy: "Traffic Police Enforcement Wing"
+    managedBy: "Traffic Police Enforcement Wing",
+    lat: 11.9338,
+    lng: 79.8255,
+    isDemo: false,
+    category: "Real-Time Sensor"
   },
   {
     id: "PK-4",
@@ -114,7 +126,11 @@ const SAMPLE_PARKING_LIST = [
     status: "OPEN",
     landmark: "Near Cathedral School Crossing",
     timings: "08:00 AM - 10:30 PM",
-    managedBy: "Puducherry Municipality"
+    managedBy: "Puducherry Municipality",
+    lat: 11.9325,
+    lng: 79.8285,
+    isDemo: true,
+    category: "Demo Sample"
   },
   {
     id: "PK-5",
@@ -128,7 +144,11 @@ const SAMPLE_PARKING_LIST = [
     status: "OPEN",
     landmark: "Near Sengunthar Public Hall",
     timings: "06:00 AM - 09:30 PM",
-    managedBy: "Muthialpet Police Station Traffic Division"
+    managedBy: "Muthialpet Police Station Traffic Division",
+    lat: 11.9490,
+    lng: 79.8315,
+    isDemo: true,
+    category: "Demo Sample"
   },
   {
     id: "PK-6",
@@ -142,7 +162,11 @@ const SAMPLE_PARKING_LIST = [
     status: "OPEN",
     landmark: "Opposite Rajiv Gandhi Indoor Stadium",
     timings: "07:00 AM - 10:00 PM",
-    managedBy: "Lawspet Traffic Regulatory Unit"
+    managedBy: "Lawspet Traffic Regulatory Unit",
+    lat: 11.9605,
+    lng: 79.8185,
+    isDemo: true,
+    category: "Demo Sample"
   }
 ];
 
@@ -274,11 +298,36 @@ function saveReports(reportsList) {
 
 function getParkingData() {
   const data = localStorage.getItem(PARKING_STORAGE_KEY);
+  let parsed;
   try {
-    return data ? JSON.parse(data) : SAMPLE_PARKING_LIST;
+    parsed = data ? JSON.parse(data) : SAMPLE_PARKING_LIST;
   } catch (e) {
-    return SAMPLE_PARKING_LIST;
+    parsed = SAMPLE_PARKING_LIST;
   }
+
+  // Ensure lat, lng, isDemo, and category are always present even for previously cached records
+  if (Array.isArray(parsed)) {
+    let modified = false;
+    parsed = parsed.map(lot => {
+      const sample = SAMPLE_PARKING_LIST.find(s => s.id === lot.id);
+      if (sample && (lot.lat === undefined || lot.lng === undefined || lot.isDemo === undefined)) {
+        modified = true;
+        return {
+          ...lot,
+          lat: sample.lat,
+          lng: sample.lng,
+          isDemo: sample.isDemo,
+          category: sample.category
+        };
+      }
+      return lot;
+    });
+    if (modified) {
+      localStorage.setItem(PARKING_STORAGE_KEY, JSON.stringify(parsed));
+    }
+  }
+
+  return parsed;
 }
 
 function saveParkingData(parkingList) {
@@ -2253,14 +2302,21 @@ function renderParkingCards() {
         <div class="card-top-bar ${topBarClass}"></div>
         <div class="card-content">
           <div class="card-header-row">
-            <h3 class="card-title">${lot.name}</h3>
+            <div>
+              <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                <span class="badge-tag ${lot.isDemo ? 'badge-tag-demo' : 'badge-tag-rt'}">
+                  ${lot.isDemo ? '🏷️ Demo Sample' : '🟢 Real-Time Sensor'}
+                </span>
+              </div>
+              <h3 class="card-title">${lot.name}</h3>
+            </div>
             <span class="status-badge ${isClosed ? 'badge-closed' : 'badge-open'}">
               ${isClosed ? 'CLOSED' : 'OPEN'}
             </span>
           </div>
 
           <p class="card-location">
-            <span>📍</span>
+            <span style="cursor:pointer;" onclick="focusParkingCard('${lot.id}')" title="Center on Map">📍</span>
             <span>${lot.location}</span>
           </p>
 
@@ -2313,21 +2369,142 @@ function renderParkingCards() {
   }).join("");
 }
 
-function updateMapPins() {
+/* =========================================================
+   LEAFLET & OPENSTREETMAP INTERACTIVE MAP ENGINE
+   - Centered on Puducherry city [11.9340, 79.8300]
+   - Shows 3 Real-Time Sensor parking lots & 3 Demo Samples
+   - Custom slot badges color-coded by availability
+   - Interactive popups with View Details & Direct Booking
+   ========================================================= */
+let leafletParkingMap = null;
+let leafletParkingMarkers = {};
+
+function initParkingMap() {
+  const mapContainer = document.getElementById("parkingMap");
+  if (!mapContainer) return;
+
+  // If Leaflet library is not loaded yet, retry shortly
+  if (typeof L === "undefined") {
+    setTimeout(initParkingMap, 150);
+    return;
+  }
+
+  // Prevent multiple initializations on the same container
+  if (leafletParkingMap) {
+    updateLeafletMapMarkers();
+    return;
+  }
+
+  // Center on Puducherry city [11.9340, 79.8300] with zoom level 13
+  leafletParkingMap = L.map("parkingMap", {
+    center: [11.9340, 79.8300],
+    zoom: 13,
+    minZoom: 11,
+    maxZoom: 18,
+    scrollWheelZoom: false // Keep page scrolling smooth
+  });
+
+  // Standard OpenStreetMap tiles + required attribution
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
+  }).addTo(leafletParkingMap);
+
+  // Invalidate size once rendered in container to fix partial grey tiles
+  setTimeout(() => {
+    if (leafletParkingMap) leafletParkingMap.invalidateSize();
+  }, 250);
+
+  updateLeafletMapMarkers();
+}
+
+function updateLeafletMapMarkers() {
+  if (!leafletParkingMap || typeof L === "undefined") return;
+
   const parkingLots = getParkingData();
-  parkingLots.forEach((lot, index) => {
-    const pin = document.querySelector(`.pin-${index + 1}`);
-    if (pin) {
-      const badge = pin.querySelector(".pin-badge");
-      if (badge) {
-        badge.textContent = lot.availableSpaces;
-        let color = "marker-green";
-        if (lot.availableSpaces === 0) color = "marker-red";
-        else if (lot.availableSpaces <= 10) color = "marker-yellow";
-        badge.className = `pin-badge ${color}`;
-      }
+
+  parkingLots.forEach(lot => {
+    if (!lot.lat || !lot.lng) return;
+
+    let markerColor = "green";
+    let statusText = "Available";
+    if (lot.availableSpaces === 0) {
+      markerColor = "red";
+      statusText = "Full";
+    } else if (lot.availableSpaces <= 10) {
+      markerColor = "yellow";
+      statusText = "Limited";
+    }
+
+    const isClosed = (lot.status || "").toUpperCase() === "CLOSED";
+
+    // Custom Leaflet DivIcon with real-time available slot number
+    const customIcon = L.divIcon({
+      className: "leaflet-custom-marker",
+      html: `
+        <div class="custom-marker-pin marker-${markerColor}" title="${lot.name} (${lot.availableSpaces} slots)">
+          <span>${lot.availableSpaces}</span>
+        </div>
+        <div class="custom-marker-label">${lot.isDemo ? '🏷️ Demo' : '🟢 Live'}</div>
+      `,
+      iconSize: [36, 48],
+      iconAnchor: [18, 42],
+      popupAnchor: [0, -38]
+    });
+
+    const popupHtml = `
+      <div class="leaflet-popup-parking">
+        <div class="lpop-header">
+          <div class="lpop-title">${lot.name}</div>
+          <span class="badge-tag ${lot.isDemo ? 'badge-tag-demo' : 'badge-tag-rt'}">
+            ${lot.isDemo ? '🏷️ Demo Sample' : '🟢 Real-Time'}
+          </span>
+        </div>
+        <p class="lpop-location">📍 ${lot.location}</p>
+        
+        <div class="lpop-stats">
+          <div class="lpop-stat-item">
+            <span class="lpop-stat-label">Available</span>
+            <span class="lpop-stat-val ${lot.availableSpaces === 0 ? 'text-red' : (lot.availableSpaces <= 10 ? 'text-yellow' : 'text-green')}">
+              ${lot.availableSpaces} / ${lot.totalSpaces}
+            </span>
+          </div>
+          <div class="lpop-stat-item">
+            <span class="lpop-stat-label">Rate</span>
+            <span class="lpop-stat-val">₹${lot.price || 20}/hr</span>
+          </div>
+          <div class="lpop-stat-item">
+            <span class="lpop-stat-label">Status</span>
+            <span class="lpop-stat-val">${isClosed ? '🔴 Closed' : '🟢 ' + statusText}</span>
+          </div>
+        </div>
+
+        <div class="lpop-actions">
+          <button class="btn btn-details" onclick="openDetailsModal('${lot.id}')">
+            Details
+          </button>
+          <button class="btn btn-book-slot ${isClosed || lot.availableSpaces === 0 ? 'btn-disabled' : ''}" 
+                  onclick="openBookingModal('${lot.id}')"
+                  ${isClosed ? 'disabled' : ''}>
+            🎟️ Book
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (leafletParkingMarkers[lot.id]) {
+      leafletParkingMarkers[lot.id].setIcon(customIcon);
+      leafletParkingMarkers[lot.id].setPopupContent(popupHtml);
+    } else {
+      const marker = L.marker([lot.lat, lot.lng], { icon: customIcon }).addTo(leafletParkingMap);
+      marker.bindPopup(popupHtml, { maxWidth: 300, minWidth: 260 });
+      leafletParkingMarkers[lot.id] = marker;
     }
   });
+}
+
+function updateMapPins() {
+  updateLeafletMapMarkers();
 }
 
 function openDetailsModal(lotId) {
@@ -3206,6 +3383,16 @@ function focusParkingCard(lotId) {
   
   renderParkingCards();
 
+  // If Leaflet map exists, center map on this parking location and trigger popup
+  const lots = getParkingData();
+  const targetLot = lots.find(l => l.id === lotId);
+  if (leafletParkingMap && targetLot && targetLot.lat && targetLot.lng) {
+    leafletParkingMap.setView([targetLot.lat, targetLot.lng], 15, { animate: true });
+    if (leafletParkingMarkers[lotId]) {
+      leafletParkingMarkers[lotId].openPopup();
+    }
+  }
+
   const card = document.getElementById(`card-${lotId}`);
   if (card) {
     card.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -3494,6 +3681,7 @@ document.addEventListener("DOMContentLoaded", () => {
   syncNavbarLoginStatus();
   setupSearchAndFilters();
   renderParkingCards();
+  initParkingMap();
   updateMapPins();
   setupReportingPage();
   setupMyReportsEvents();
