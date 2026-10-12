@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -16,14 +16,7 @@
   <header class="navbar">
     <div class="nav-container">
       <a href="index.html" class="brand">
-        <div class="brand-shield">
-          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
-            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
-            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
-            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <div class="brand-shield"><img src="puducherry-police-logo.svg" alt="Puducherry Police Emblem" class="police-emblem" /></div>
         <div class="brand-titles">
           <span class="brand-name">Smartpark Puducherry</span>
           <span class="brand-tag">TRAFFIC ENFORCEMENT & CITIZEN PORTAL</span>
@@ -61,7 +54,7 @@
 
       <div class="login-card">
         <div class="login-header text-center">
-          <div class="login-avatar-emblem">🔐</div>
+          <div class="login-avatar-emblem">ðŸ”</div>
           <h2>Portal Login</h2>
           <p>Prototype Quick Access (No password required for demo)</p>
         </div>
@@ -87,11 +80,11 @@
                 type="password" 
                 id="loginPassword" 
                 class="form-input" 
-                placeholder="••••••••"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                 required
               />
               <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" onclick="togglePasswordVisibility('loginPassword', this)">
-                👁️
+                ðŸ‘ï¸
               </button>
             </div>
           </div>
@@ -110,32 +103,32 @@
         <div class="role-buttons-grid">
           <!-- 1. Citizen -->
           <button type="button" class="btn-role btn-role-citizen" onclick="loginAsRole('citizen')">
-            <div class="role-icon">👤</div>
+            <div class="role-icon">ðŸ‘¤</div>
             <div class="role-details">
               <strong>Citizen</strong>
               <span>Find parking & submit reports</span>
             </div>
-            <span class="role-arrow">→</span>
+            <span class="role-arrow">â†’</span>
           </button>
 
           <!-- 2. Police -->
           <button type="button" class="btn-role btn-role-police" onclick="openStaffLoginModal('police')">
-            <div class="role-icon">👮‍♂️</div>
+            <div class="role-icon">ðŸ‘®â€â™‚ï¸</div>
             <div class="role-details">
               <strong>Police Login</strong>
               <span>Traffic Police Command Dashboard</span>
             </div>
-            <span class="role-arrow">→</span>
+            <span class="role-arrow">â†’</span>
           </button>
 
           <!-- 3. Admin -->
           <button type="button" class="btn-role btn-role-admin" onclick="openStaffLoginModal('admin')">
-            <div class="role-icon">⚙️</div>
+            <div class="role-icon">âš™ï¸</div>
             <div class="role-details">
               <strong>Admin</strong>
               <span>Manage parking lots & stats</span>
             </div>
-            <span class="role-arrow">→</span>
+            <span class="role-arrow">â†’</span>
           </button>
         </div>
 
@@ -151,7 +144,7 @@
             <span class="modal-badge" id="staffModalBadge">Official Access Portal</span>
             <h3 id="staffModalTitle">Police Officer Login</h3>
           </div>
-          <button class="modal-close" type="button" onclick="closeStaffAuthModal()">✕</button>
+          <button class="modal-close" type="button" onclick="closeStaffAuthModal()">âœ•</button>
         </div>
 
         <!-- 1. Staff Login Form -->
@@ -177,9 +170,9 @@
             <div class="form-group" style="margin-bottom: 18px;">
               <label class="form-label" for="staffLoginPassword">Password <span class="required">*</span></label>
               <div class="password-wrapper">
-                <input type="password" id="staffLoginPassword" class="form-input" placeholder="••••••••" required />
+                <input type="password" id="staffLoginPassword" class="form-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
                 <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" onclick="togglePasswordVisibility('staffLoginPassword', this)">
-                  👁️
+                  ðŸ‘ï¸
                 </button>
               </div>
             </div>
@@ -227,7 +220,7 @@
               <div class="password-wrapper">
                 <input type="password" id="staffRegPassword" class="form-input" placeholder="Create secure password" minlength="4" required />
                 <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" onclick="togglePasswordVisibility('staffRegPassword', this)">
-                  👁️
+                  ðŸ‘ï¸
                 </button>
               </div>
             </div>
@@ -255,14 +248,7 @@
   <footer class="footer">
     <div class="container footer-content">
       <div class="footer-brand">
-        <div class="brand-shield footer-shield">
-          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
-            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
-            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
-            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <div class="brand-shield footer-shield"><img src="puducherry-police-logo.svg" alt="Puducherry Police Emblem" class="police-emblem" /></div>
         <span class="footer-title">Smartpark Puducherry</span>
       </div>
       <p class="footer-text">
@@ -277,3 +263,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
