@@ -8,6 +8,7 @@
 
 // LocalStorage Keys
 const PARKING_STORAGE_KEY = "ParkingData";
+const PARKING_LAST_UPDATED_KEY = "ParkingLastUpdatedTimestamp"; // 1-Hour dynamic interval tracker
 const REPORTS_STORAGE_KEY = "reports";
 const USER_STORAGE_KEY = "Current User"; // As requested by user
 const PROFILE_STORAGE_KEY = "UserProfileData"; // User profile details
@@ -2516,71 +2517,107 @@ function injectBottomNavigation() {
    - Live stream ticker & Presentation Mode toggle
    ========================================================= */
 let isLiveSimRunning = true;
-let simIntervalTimer = null;
+/* =========================================================
+   8. HOURLY PARKING AVAILABILITY UPDATE ENGINE (LocalStorage)
+   - Parking availability changes every 1 hour (3600000 ms)
+   - Saves all updated slot counts in LocalStorage ("ParkingData")
+   - Tracks timestamp in LocalStorage ("ParkingLastUpdatedTimestamp")
+   - Displays dynamic countdown in find-parking.html
+   ========================================================= */
+const ONE_HOUR_MS = 60 * 60 * 1000; // 3,600,000 milliseconds = 1 Hour
 
-function startSmartCityLiveStream() {
-  // Update random parking lot occupancy every 6 seconds to show dynamic system behavior
-  if (simIntervalTimer) clearInterval(simIntervalTimer);
-  
-  simIntervalTimer = setInterval(() => {
-    if (!isLiveSimRunning) return;
+function performHourlyParkingUpdate() {
+  const parkingLots = getParkingData();
+  if (!parkingLots || parkingLots.length === 0) return;
 
-    // 1. Dynamic Parking Slot simulation (IoT Ultrasonic sensors telemetry)
-    const parkingLots = getParkingData();
-    if (parkingLots && parkingLots.length > 0) {
-      // Pick a random lot to simulate vehicle entry or exit
-      const randomIndex = Math.floor(Math.random() * parkingLots.length);
-      const targetLot = parkingLots[randomIndex];
-      
-      const delta = Math.random() > 0.5 ? 1 : -1;
-      const updatedAvailable = Math.max(0, Math.min(targetLot.totalSpaces, targetLot.availableSpaces + delta));
+  // Simulate realistic hourly fluctuation across Puducherry parking locations
+  parkingLots.forEach(lot => {
+    // Determine realistic occupancy shift (-15% to +15% of total capacity)
+    const maxShift = Math.max(2, Math.round(lot.totalSpaces * 0.15));
+    const randomChange = Math.floor(Math.random() * (maxShift * 2 + 1)) - maxShift;
+    
+    // Calculate new available spaces within valid boundaries [0, totalSpaces]
+    let newAvailable = lot.availableSpaces + randomChange;
+    newAvailable = Math.max(0, Math.min(lot.totalSpaces, newAvailable));
+    lot.availableSpaces = newAvailable;
+  });
 
-      if (updatedAvailable !== targetLot.availableSpaces) {
-        targetLot.availableSpaces = updatedAvailable;
-        saveParkingData(parkingLots);
+  // Save new parking data into LocalStorage
+  saveParkingData(parkingLots);
 
-        // Re-render parking if currently on parking page
-        if (document.getElementById("parkingGrid")) {
-          renderParkingCards();
-          updateMapPins();
-        }
-        // Re-render admin dashboard if active
-        if (document.getElementById("adminParkingTbody")) {
-          renderAdminDashboard();
-        }
-      }
-    }
+  // Record current update timestamp in LocalStorage
+  const now = Date.now();
+  localStorage.setItem(PARKING_LAST_UPDATED_KEY, now.toString());
 
-    // 2. Dynamic Traffic Monitoring Telemetry updates
-    const trafficData = localStorage.getItem(TRAFFIC_STORAGE_KEY);
-    if (trafficData) {
-      try {
-        let areas = JSON.parse(trafficData);
-        if (areas && areas.length > 0) {
-          const randAreaIdx = Math.floor(Math.random() * areas.length);
-          const area = areas[randAreaIdx];
-          
-          // Occasional shift in parking availability or minor reports
-          const levels = ["Low", "Medium", "High"];
-          if (Math.random() > 0.6) {
-            area.parkingAvailability = levels[Math.floor(Math.random() * levels.length)];
-            localStorage.setItem(TRAFFIC_STORAGE_KEY, JSON.stringify(areas));
-            if (document.getElementById("trafficGrid")) {
-              renderTrafficMonitoringPage();
-            }
-          }
-        }
-      } catch (e) {}
-    }
+  // Re-render UI components if currently viewing pages
+  if (document.getElementById("parkingGrid")) {
+    renderParkingCards();
+    updateMapPins();
+  }
+  if (document.getElementById("adminParkingTbody")) {
+    renderAdminDashboard();
+  }
+  if (document.getElementById("trafficGrid")) {
+    renderTrafficMonitoringPage();
+  }
 
-    // Pulse live ticker if present
-    const pulseDot = document.getElementById("liveIoTPulse");
-    if (pulseDot) {
-      pulseDot.classList.add("pulse-ping");
-      setTimeout(() => pulseDot.classList.remove("pulse-ping"), 800);
-    }
-  }, 5000);
+  console.log(`[SmartPark] Hourly parking availability update applied and saved to LocalStorage at ${new Date().toLocaleTimeString()}`);
 }
+
+function checkAndTriggerHourlyParkingUpdate() {
+  const now = Date.now();
+  const lastUpdatedStr = localStorage.getItem(PARKING_LAST_UPDATED_KEY);
+
+  if (!lastUpdatedStr) {
+    // First time setup: set timestamp and perform initial baseline update
+    localStorage.setItem(PARKING_LAST_UPDATED_KEY, now.toString());
+  } else {
+    const lastUpdated = parseInt(lastUpdatedStr, 10);
+    const elapsed = now - lastUpdated;
+
+    if (elapsed >= ONE_HOUR_MS) {
+      // 1 hour or more has passed: perform dynamic update
+      performHourlyParkingUpdate();
+    }
+  }
+
+  // Update hourly countdown banner on find-parking.html
+  updateHourlyCountdownUI();
+}
+
+function updateHourlyCountdownUI() {
+  const badgeElem = document.getElementById("hourlyCountdownBadge");
+  const textElem = document.getElementById("hourlySyncText");
+  if (!badgeElem) return; // Not on find-parking.html
+
+  const now = Date.now();
+  const lastUpdatedStr = localStorage.getItem(PARKING_LAST_UPDATED_KEY) || now.toString();
+  const lastUpdated = parseInt(lastUpdatedStr, 10);
+  const elapsed = now - lastUpdated;
+  const remaining = Math.max(0, ONE_HOUR_MS - (elapsed % ONE_HOUR_MS));
+
+  const minutes = Math.floor(remaining / (60 * 1000));
+  const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+
+  badgeElem.textContent = `Next update in: ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+
+  if (textElem) {
+    const lastUpdateDate = new Date(lastUpdated);
+    const timeFormatted = lastUpdateDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    textElem.textContent = `Availability updates hourly (Last synced: ${timeFormatted})`;
+  }
+}
+
+function startHourlyParkingTimer() {
+  // Check immediately upon loading
+  checkAndTriggerHourlyParkingUpdate();
+
+  // Tick every 1 second to update the countdown badge and detect 1-hour expiry
+  setInterval(() => {
+    checkAndTriggerHourlyParkingUpdate();
+  }, 1000);
+}
+
 
 function injectSmartCityLiveTicker() {
   // Inject a sleek futuristic status bar at the very top of each page
@@ -2600,7 +2637,7 @@ function injectSmartCityLiveTicker() {
         <span class="ticker-sep">•</span>
         <span>🤖 <strong>AI Flow:</strong> Predictive parking routing active</span>
         <span class="ticker-sep">•</span>
-        <span>⏱️ <strong>Update Rate:</strong> Real-time 5s sync</span>
+        <span>⏱️ <strong>Update Rate:</strong> Hourly dynamic sync</span>
       </div>
       <div class="ticker-actions">
         <span class="tech-tag">PROTOTYPE 2.0</span>
@@ -2617,7 +2654,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initUserProfile();
   setupNavbar();
   injectSmartCityLiveTicker();
-  startSmartCityLiveStream();
+  startHourlyParkingTimer();
   injectBottomNavigation();
   syncNavbarLoginStatus();
   setupSearchAndFilters();
@@ -2631,6 +2668,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTrafficMonitoringPage();
   renderAdminDashboard();
   renderProfilePage();
-  console.log("Smartpark Puducherry - Ready with Live IoT Engine. Role:", getCurrentUserRole());
+  console.log("Smartpark Puducherry - Ready with Hourly Parking Sync Engine. Role:", getCurrentUserRole());
 });
 

@@ -5,7 +5,7 @@
       "name": "White Town Parking",
       "location": "Rue Romain Rolland, Near Promenade Beach, White Town, Puducherry - 605001",
       "totalSpaces": 80,
-      "availableSpaces": 36,
+      "availableSpaces": 40,
       "twoWheelerPrice": 20,
       "fourWheelerPrice": 40,
       "price": 20,
@@ -19,7 +19,7 @@
       "name": "Heritage Town Parking",
       "location": "Vysial Street, Near Sri Manakula Vinayagar Temple, Heritage Town, Puducherry - 605001",
       "totalSpaces": 50,
-      "availableSpaces": 1,
+      "availableSpaces": 25,
       "twoWheelerPrice": 15,
       "fourWheelerPrice": 30,
       "price": 15,
@@ -33,7 +33,7 @@
       "name": "MG Road Parking",
       "location": "Mahatma Gandhi Road, Near Rangapillai Street Junction, Puducherry - 605001",
       "totalSpaces": 100,
-      "availableSpaces": 51,
+      "availableSpaces": 64,
       "twoWheelerPrice": 30,
       "fourWheelerPrice": 50,
       "price": 30,
@@ -47,7 +47,7 @@
       "name": "Mission Street Parking",
       "location": "Mission Street, Opposite Immaculate Conception Cathedral, Puducherry - 605001",
       "totalSpaces": 60,
-      "availableSpaces": 0,
+      "availableSpaces": 1,
       "twoWheelerPrice": 20,
       "fourWheelerPrice": 40,
       "price": 20,
@@ -61,7 +61,7 @@
       "name": "Muthialpet Parking",
       "location": "Mahatma Gandhi Road North, Muthialpet Clock Tower Junction, Puducherry - 605003",
       "totalSpaces": 70,
-      "availableSpaces": 25,
+      "availableSpaces": 19,
       "twoWheelerPrice": 15,
       "fourWheelerPrice": 30,
       "price": 15,
@@ -75,7 +75,7 @@
       "name": "Lawspet Main Road Parking",
       "location": "Airport Road, Lawspet, Puducherry - 605008",
       "totalSpaces": 40,
-      "availableSpaces": 5,
+      "availableSpaces": 7,
       "twoWheelerPrice": 15,
       "fourWheelerPrice": 30,
       "price": 15,
@@ -135,7 +135,7 @@
     {
       "area": "White Town",
       "trafficLevel": "High",
-      "parkingAvailability": "Medium",
+      "parkingAvailability": "Low",
       "reportsCount": 6
     },
     {
@@ -153,13 +153,13 @@
     {
       "area": "Heritage Town",
       "trafficLevel": "Medium",
-      "parkingAvailability": "High",
+      "parkingAvailability": "Low",
       "reportsCount": 3
     },
     {
       "area": "Lawspet",
       "trafficLevel": "Low",
-      "parkingAvailability": "Medium",
+      "parkingAvailability": "Low",
       "reportsCount": 1
     },
     {

@@ -203,25 +203,34 @@ function saveDatabase(db) {
   }
 }
 
-// Background Simulated IoT Sensor Telemetry (Puducherry Smart Grid)
-setInterval(() => {
+// Background Dynamic Parking Fluctuation Engine (Runs every 1 hour)
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
+function runHourlyServerUpdate() {
   const db = loadDatabase();
   if (db && db.parking && db.parking.length > 0) {
-    const randomLot = db.parking[Math.floor(Math.random() * db.parking.length)];
-    const delta = Math.random() > 0.5 ? 1 : -1;
-    randomLot.availableSpaces = Math.max(0, Math.min(randomLot.totalSpaces, randomLot.availableSpaces + delta));
+    db.parking.forEach(lot => {
+      const maxShift = Math.max(2, Math.round(lot.totalSpaces * 0.15));
+      const randomChange = Math.floor(Math.random() * (maxShift * 2 + 1)) - maxShift;
+      let newAvailable = lot.availableSpaces + randomChange;
+      lot.availableSpaces = Math.max(0, Math.min(lot.totalSpaces, newAvailable));
+    });
 
-    // Also update traffic availability occasionally
     if (db.traffic && db.traffic.length > 0) {
-      const area = db.traffic[Math.floor(Math.random() * db.traffic.length)];
-      if (Math.random() > 0.7) {
-        const levels = ["Low", "Medium", "High"];
-        area.parkingAvailability = levels[Math.floor(Math.random() * levels.length)];
-      }
+      const levels = ["Low", "Medium", "High"];
+      db.traffic.forEach(area => {
+        if (Math.random() > 0.5) {
+          area.parkingAvailability = levels[Math.floor(Math.random() * levels.length)];
+        }
+      });
     }
+
     saveDatabase(db);
+    console.log(`[SmartPark Backend] Hourly parking availability updated across Puducherry at ${new Date().toLocaleTimeString()}`);
   }
-}, 5000);
+}
+
+setInterval(runHourlyServerUpdate, ONE_HOUR_MS);
 
 // Helper to parse JSON request body
 function parseRequestBody(req) {
