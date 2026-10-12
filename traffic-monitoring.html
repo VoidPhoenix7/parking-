@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smartpark Puducherry - Traffic Monitoring</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- NAVIGATION BAR -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">Smartpark Puducherry</span>
+          <span class="brand-tag">TRAFFIC ENFORCEMENT & CITIZEN PORTAL</span>
+        </div>
+      </a>
+
+      <!-- Hamburger toggle button for Mobile -->
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu" id="navLinks">
+        <a href="police-dashboard.html" class="nav-link" id="trafficNavDashboardLink">Dashboard</a>
+        <a href="traffic-monitoring.html" class="nav-link active">Traffic Monitoring</a>
+      </nav>
+
+      <div class="nav-user-panel" id="trafficNavUserPanel">
+        <span class="user-role-badge badge-police" id="trafficRoleBadge">👮 Official Access</span>
+        <button class="btn-logout" onclick="logoutUser()">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <section class="page-header bg-police-header">
+    <div class="container text-center">
+      <span class="page-badge">Official Enforcement Tool</span>
+      <h1 class="page-title">Traffic Monitoring</h1>
+      <p class="page-subtitle">Real-time traffic flow levels and parking availability across key zones in Puducherry</p>
+    </div>
+  </section>
+
+  <!-- RESTRICTED ACCESS NOTIFICATION (Visible for citizens or unauthenticated users) -->
+  <div class="container my-40 hidden" id="trafficAccessDenied">
+    <div class="auth-prompt-card" style="margin: 0 auto;">
+      <div class="auth-prompt-icon">🛡️</div>
+      <h2>Restricted Official Access</h2>
+      <p>Traffic Monitoring is an internal enforcement tool reserved strictly for <strong>Puducherry Traffic Police</strong> and <strong>Municipal Administrators</strong>.</p>
+      <p style="font-size: 0.85rem; color: #dc2626; font-weight: 700; margin-top: 10px;">
+        Citizens are not authorized to view this page.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 14px; margin-top: 24px; flex-wrap: wrap;">
+        <a href="index.html" class="btn btn-primary" style="padding: 10px 22px;">Return to Home</a>
+        <a href="login.html" class="btn btn-outline" style="border: 2px solid #cbd5e1; padding: 10px 22px;">Official Login</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN TRAFFIC CONTENT (Only visible for Police & Admin) -->
+  <main class="container my-40" id="trafficMainContent">
+
+    <!-- TRAFFIC OVERVIEW SECTION -->
+    <div class="traffic-overview-card">
+      <div class="traffic-overview-header">
+        <div>
+          <h2 class="results-title">Traffic Overview</h2>
+          <p class="section-subtitle" style="text-align: left; margin-bottom: 0;">Citywide real-time operational metrics</p>
+        </div>
+        <span class="storage-indicator">🟢 Live Synced</span>
+      </div>
+
+      <div class="dashboard-stats-grid" style="margin-bottom: 0;">
+        <div class="dash-stat-card">
+          <span class="dash-stat-number color-blue" id="overviewTotalReports">0</span>
+          <span class="dash-stat-label">Total Reports</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-number color-red" id="overviewHighTraffic">0</span>
+          <span class="dash-stat-label">High Traffic Areas</span>
+        </div>
+        <div class="dash-stat-card">
+          <span class="dash-stat-number color-green" id="overviewAvailableParking">0</span>
+          <span class="dash-stat-label">Available Parking</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AREA TRAFFIC CARDS GRID -->
+    <div style="margin-top: 36px;">
+      <h2 class="results-title" style="margin-bottom: 8px;">Key Area Conditions</h2>
+      <p class="section-subtitle" style="text-align: left; margin-bottom: 24px;">Current traffic congestion, parking availability, and citizen report count</p>
+
+      <div class="traffic-areas-grid" id="trafficAreasGrid">
+        <!-- Dynamically rendered from JavaScript / LocalStorage -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="brand-shield footer-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="footer-title">Smartpark Puducherry</span>
+      </div>
+      <p class="footer-text">
+        Making parking easier and roads safer for citizens and tourists across Puducherry.
+      </p>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Smartpark Puducherry. Puducherry Police Traffic Enforcement & Municipal Administration.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

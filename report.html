@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smartpark Puducherry - Report a Problem</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- 1. NAVIGATION BAR -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <!-- Indian Police Emblem Badge -->
+        <div class="brand-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">Smartpark Puducherry</span>
+          <span class="brand-tag">TRAFFIC ENFORCEMENT & CITIZEN PORTAL</span>
+        </div>
+      </a>
+
+      <!-- Hamburger toggle button for Mobile -->
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu" id="navLinks">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="find-parking.html" class="nav-link">Find Parking</a>
+        <a href="report.html" class="nav-link active">Report</a>
+        <a href="my-reports.html" class="nav-link">My Reports</a>
+        <a href="login.html" class="nav-link nav-btn-login">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 2. PAGE HEADER -->
+  <section class="page-header">
+    <div class="container text-center">
+      <span class="page-badge">Citizen Reporting Portal</span>
+      <h1 class="page-title">Report a Problem</h1>
+      <p class="page-subtitle">Select a violation category and submit photographic evidence directly to Traffic Police</p>
+    </div>
+  </section>
+
+  <!-- 3. MAIN CONTENT -->
+  <main class="container my-40">
+
+    <!-- STEP 1: SELECT VIOLATION TYPE (LARGE CARDS FOR MOBILE) -->
+    <div class="report-step-box">
+      <div class="step-indicator-bar">
+        <span class="step-badge">Step 1</span>
+        <h2 class="step-heading">Select Problem Type</h2>
+      </div>
+      <p class="step-subtext">Tap a violation category below to fill the report form:</p>
+
+      <div class="violation-grid" id="violationGrid">
+        <!-- 1. Illegal Parking -->
+        <button type="button" class="violation-card" data-type="Illegal Parking">
+          <div class="violation-icon">🚫</div>
+          <div class="violation-name">Illegal Parking</div>
+        </button>
+
+        <!-- 2. No Parking -->
+        <button type="button" class="violation-card" data-type="No Parking">
+          <div class="violation-icon">🚳</div>
+          <div class="violation-name">No Parking</div>
+        </button>
+
+        <!-- 3. Road Obstruction -->
+        <button type="button" class="violation-card" data-type="Road Obstruction">
+          <div class="violation-icon">🚧</div>
+          <div class="violation-name">Road Obstruction</div>
+        </button>
+
+        <!-- 4. Footpath Parking -->
+        <button type="button" class="violation-card" data-type="Footpath Parking">
+          <div class="violation-icon">🚶‍♂️</div>
+          <div class="violation-name">Footpath Parking</div>
+        </button>
+
+        <!-- 5. Double Parking -->
+        <button type="button" class="violation-card" data-type="Double Parking">
+          <div class="violation-icon">🚗🚗</div>
+          <div class="violation-name">Double Parking</div>
+        </button>
+
+        <!-- 6. Abandoned Vehicle -->
+        <button type="button" class="violation-card" data-type="Abandoned Vehicle">
+          <div class="violation-icon">🏚️</div>
+          <div class="violation-name">Abandoned Vehicle</div>
+        </button>
+
+        <!-- 7. Traffic Congestion -->
+        <button type="button" class="violation-card" data-type="Traffic Congestion">
+          <div class="violation-icon">🚦</div>
+          <div class="violation-name">Traffic Congestion</div>
+        </button>
+
+        <!-- 8. Others -->
+        <button type="button" class="violation-card" data-type="Others">
+          <div class="violation-icon">⚠️</div>
+          <div class="violation-name">Others</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: REPORT FORM (Revealed upon selection) -->
+    <div class="report-form-card" id="reportFormSection">
+      <div class="step-indicator-bar">
+        <span class="step-badge">Step 2</span>
+        <h2 class="step-heading">Report Details</h2>
+      </div>
+      <p class="step-subtext">Please fill in accurate details so traffic authorities can take prompt action.</p>
+
+      <form id="violationForm" novalidate>
+
+        <!-- Problem Type (auto-populated from step 1 or selectable) -->
+        <div class="form-group">
+          <label for="problemType" class="form-label">
+            Problem Type <span class="required">*</span>
+          </label>
+          <div class="selected-type-badge-row">
+            <input type="text" id="problemType" class="form-input form-input-highlight" readonly placeholder="Please click an option above" />
+          </div>
+          <span class="error-msg" id="problemTypeError">Please select a problem type from the options above.</span>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label for="locationInput" class="form-label">
+            Location in Puducherry <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="locationInput" 
+            class="form-input" 
+            placeholder="e.g. Mission Street, near Calve College or White Town Beach Road"
+            required
+          />
+          <span class="error-msg" id="locationError">Location cannot be empty. Please enter the street or area.</span>
+        </div>
+
+        <!-- Vehicle Number -->
+        <div class="form-group">
+          <label for="vehicleInput" class="form-label">
+            Vehicle Registration Number <span class="optional">(Optional if unknown)</span>
+          </label>
+          <input 
+            type="text" 
+            id="vehicleInput" 
+            class="form-input" 
+            placeholder="e.g. PY-01-AB-1234 or TN-32-CD-5678"
+            style="text-transform: uppercase;"
+          />
+        </div>
+
+        <!-- Date & Time (in a clean 2-column grid on desktop) -->
+        <div class="form-row">
+          <div class="form-group col-half">
+            <label for="dateInput" class="form-label">Date <span class="required">*</span></label>
+            <input type="date" id="dateInput" class="form-input" required />
+            <span class="error-msg" id="dateError">Please specify the date.</span>
+          </div>
+
+          <div class="form-group col-half">
+            <label for="timeInput" class="form-label">Time <span class="required">*</span></label>
+            <input type="time" id="timeInput" class="form-input" required />
+            <span class="error-msg" id="timeError">Please specify the time.</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="descInput" class="form-label">
+            Description of the Problem <span class="required">*</span>
+          </label>
+          <textarea 
+            id="descInput" 
+            class="form-textarea" 
+            rows="4" 
+            placeholder="Describe the issue (e.g. Black SUV parked blocking pedestrian footpath and creating difficulty for elderly citizens)..."
+            required
+          ></textarea>
+          <span class="error-msg" id="descError">Description cannot be empty. Please provide details.</span>
+        </div>
+
+        <!-- Upload Photo Evidence (Base64 compression + Preview) -->
+        <div class="form-group">
+          <label class="form-label">
+            Upload Photo Evidence <span class="optional">(Recommended)</span>
+          </label>
+          
+          <div class="photo-upload-area" id="uploadDropArea">
+            <input 
+              type="file" 
+              id="photoInput" 
+              accept="image/*" 
+              class="photo-file-input" 
+            />
+            <label for="photoInput" class="photo-upload-label">
+              <span class="upload-icon">📸</span>
+              <strong>Click to upload photo evidence</strong>
+              <span class="upload-hint">Supports JPEG, PNG, WEBP from your phone camera or computer</span>
+            </label>
+          </div>
+
+          <!-- Photo Preview Container -->
+          <div class="photo-preview-box hidden" id="photoPreviewContainer">
+            <div class="preview-img-wrapper">
+              <img id="photoPreviewImg" src="" alt="Violation Evidence Preview" />
+            </div>
+            <div class="preview-actions">
+              <span class="preview-size-badge" id="photoSizeBadge">Image Ready</span>
+              <button type="button" class="btn-remove-photo" id="btnRemovePhoto">
+                🗑️ Remove Photo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-danger btn-large btn-submit" id="btnSubmitReport">
+            <span>📢</span> Submit Report
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- SUCCESS CONFIRMATION MODAL -->
+    <div class="modal-overlay hidden" id="successModal">
+      <div class="modal-box modal-success-box">
+        <div class="modal-header bg-green-header">
+          <div class="modal-header-info">
+            <span class="modal-badge-white">Report Acknowledged</span>
+            <h3>Report Submitted Successfully!</h3>
+          </div>
+          <button class="modal-close" onclick="closeSuccessModal()">✕</button>
+        </div>
+        <div class="modal-body text-center">
+          <div class="success-icon-badge">✅</div>
+          <h4 class="success-title">Thank You, Citizen!</h4>
+          <p class="success-subtext">
+            Your complaint has been registered with Puducherry Traffic Police Enforcement Division.
+          </p>
+
+          <div class="report-id-card">
+            <span class="id-label">YOUR REPORT REFERENCE ID</span>
+            <span class="id-value" id="generatedReportId">PS-001</span>
+            <span class="id-note">Please save this ID to track your report status</span>
+          </div>
+
+          <div class="success-summary" id="successSummary">
+            <!-- Dynamically populated summary -->
+          </div>
+        </div>
+        <div class="modal-footer modal-footer-actions">
+          <button type="button" class="btn btn-primary" onclick="closeSuccessModal()">
+            Submit Another Report
+          </button>
+          <a href="my-reports.html" class="btn btn-danger">
+            Track My Reports
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 4. FOOTER -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="brand-shield footer-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="footer-title">Smartpark Puducherry</span>
+      </div>
+      <p class="footer-text">
+        Making parking easier and roads safer for citizens and tourists across Puducherry.
+      </p>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Smartpark Puducherry. Puducherry Police Traffic Enforcement & Municipal Administration.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

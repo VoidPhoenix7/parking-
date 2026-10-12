@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smartpark Puducherry - Police Enforcement Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js for Simple Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- NAVIGATION BAR WITH ROLE & LOGOUT -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">Smartpark Puducherry</span>
+          <span class="brand-tag">POLICE ENFORCEMENT PORTAL</span>
+        </div>
+      </a>
+
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <nav class="nav-menu" id="navLinks">
+        <a href="police-dashboard.html" class="nav-link active">Dashboard</a>
+        <a href="traffic-monitoring.html" class="nav-link">🚦 Traffic Monitoring</a>
+      </nav>
+
+      <div class="nav-user-panel">
+        <span class="user-role-badge badge-police">👮 Logged in as: Police Officer</span>
+        <button class="btn-logout" onclick="logoutUser()">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- DASHBOARD BANNER -->
+  <section class="page-header bg-police-header">
+    <div class="container text-center">
+      <span class="page-badge badge-police-light">Traffic Police Command Center</span>
+      <h1 class="page-title">Traffic Police Dashboard</h1>
+      <p class="page-subtitle">Review incoming citizen traffic violations, inspect photographic evidence, and update status in real time</p>
+    </div>
+  </section>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="container my-40">
+
+    <!-- SUMMARY METRICS: 4 STATISTICS FROM LOCALSTORAGE -->
+    <div class="dashboard-stats-grid">
+      <div class="dash-stat-card">
+        <span class="dash-stat-number color-blue" id="dashTotalReports">0</span>
+        <span class="dash-stat-label">Total Reports</span>
+      </div>
+      <div class="dash-stat-card">
+        <span class="dash-stat-number color-yellow" id="dashPendingReports">0</span>
+        <span class="dash-stat-label">Pending Reports</span>
+      </div>
+      <div class="dash-stat-card">
+        <span class="dash-stat-number" style="color: #f97316;" id="dashVerifiedReports">0</span>
+        <span class="dash-stat-label">Verified Reports</span>
+      </div>
+      <div class="dash-stat-card">
+        <span class="dash-stat-number color-green" id="dashResolvedReports">0</span>
+        <span class="dash-stat-label">Resolved Reports</span>
+      </div>
+    </div>
+
+    <!-- SIMPLE ANALYTICS CHARTS SECTION (Chart.js) -->
+    <div class="police-analytics-section">
+      <div class="dash-table-header" style="margin-bottom: 16px;">
+        <div>
+          <h2 class="results-title">Traffic & Violation Analytics</h2>
+          <p class="section-subtitle" style="text-align: left; margin-bottom: 0;">Interactive trends and breakdown powered by LocalStorage data</p>
+        </div>
+        <span class="storage-indicator">📊 Chart.js Powered</span>
+      </div>
+
+      <div class="police-charts-grid">
+        <!-- Chart 1: Reports by Problem Type -->
+        <div class="chart-card">
+          <h3 class="chart-title">1. Reports by Problem Type</h3>
+          <p class="chart-subtitle">Illegal Parking, No Parking, Obstruction, Congestion, Others</p>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chartProblemType"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Reports by Status -->
+        <div class="chart-card">
+          <h3 class="chart-title">2. Reports by Status</h3>
+          <p class="chart-subtitle">Submitted, Under Review, Verified, Resolved</p>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chartReportStatus"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Parking Availability -->
+        <div class="chart-card">
+          <h3 class="chart-title">3. Parking Availability</h3>
+          <p class="chart-subtitle">Available Spaces vs Occupied Spaces in Puducherry</p>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chartParkingAvailability"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENFORCEMENT TABLE CARD -->
+    <div class="controls-card">
+      <div class="dash-table-header">
+        <div>
+          <h2 class="results-title">Recent Reports</h2>
+          <p class="section-subtitle" style="text-align: left; margin-bottom: 0;">Review violations, verify evidence, or mark resolved</p>
+        </div>
+        <div class="dash-filter-wrap">
+          <label style="font-weight: 700; font-size: 0.9rem; margin-right: 8px;">Filter:</label>
+          <select id="policeStatusFilter" class="form-input" style="width: auto; padding: 8px 14px;" onchange="renderPoliceReports()">
+            <option value="all">All Reports</option>
+            <option value="Submitted">Submitted (Pending)</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Verified">Verified</option>
+            <option value="Resolved">Resolved</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- DESKTOP TABLE VIEW -->
+      <div class="table-responsive police-desktop-table">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>Report ID</th>
+              <th>Problem</th>
+              <th>Location</th>
+              <th>Vehicle</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="policeReportsTbody">
+            <!-- Dynamically populated from LocalStorage "reports" -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE CARDS VIEW -->
+      <div class="police-mobile-cards" id="policeReportsCards">
+        <!-- Dynamically populated from LocalStorage "reports" on mobile -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- DETAILS MODAL -->
+  <div class="modal-overlay hidden" id="reportDetailsModal">
+    <div class="modal-box modal-report-details-box">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="modal-badge">Puducherry Traffic Police Case File</span>
+          <h3 id="modalReportTitle">Report Details</h3>
+        </div>
+        <button class="modal-close" onclick="closeReportModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalReportBody"></div>
+      <div class="modal-footer modal-footer-actions">
+        <button type="button" class="btn btn-primary btn-close-modal" onclick="closeReportModal()">
+          Close Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>&copy; 2026 Smartpark Puducherry. Puducherry Police Traffic Enforcement Portal.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

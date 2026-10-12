@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smartpark Puducherry - Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- NAVIGATION BAR WITH ROLE & LOGOUT -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <div class="brand-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">Smartpark Puducherry</span>
+          <span class="brand-tag">ADMIN PORTAL</span>
+        </div>
+      </a>
+
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <nav class="nav-menu" id="navLinks">
+        <a href="admin-dashboard.html" class="nav-link active">Admin Portal</a>
+        <a href="traffic-monitoring.html" class="nav-link">🚦 Traffic Monitoring</a>
+      </nav>
+
+      <div class="nav-user-panel">
+        <span class="user-role-badge badge-admin">⚙️ Logged in as: System Admin</span>
+        <button class="btn-logout" onclick="logoutUser()">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- DASHBOARD BANNER -->
+  <section class="page-header bg-admin-header">
+    <div class="container text-center">
+      <span class="page-badge badge-admin-light">System & Infrastructure Control</span>
+      <h1 class="page-title">Admin Dashboard</h1>
+      <p class="page-subtitle">Manage Puducherry parking facilities, simulate live slot availability, and oversee accounts</p>
+    </div>
+  </section>
+
+  <!-- MAIN ADMIN CONTENT -->
+  <main class="container my-40">
+
+    <!-- 1. OVERVIEW STATS (4 Required: Total Users, Total Parking Locations, Total Reports, Resolved Reports) -->
+    <div class="dashboard-stats-grid">
+      <div class="dash-stat-card">
+        <span class="dash-stat-number color-blue" id="adminTotalUsers">0</span>
+        <span class="dash-stat-label">Total Users</span>
+      </div>
+      <div class="dash-stat-card">
+        <span class="dash-stat-number color-green" id="adminTotalLots">0</span>
+        <span class="dash-stat-label">Total Parking Locations</span>
+      </div>
+      <div class="dash-stat-card">
+        <span class="dash-stat-number color-yellow" id="adminTotalReports">0</span>
+        <span class="dash-stat-label">Total Reports</span>
+      </div>
+      <div class="dash-stat-card">
+        <span class="dash-stat-number" style="color: #10b981;" id="adminResolvedReports">0</span>
+        <span class="dash-stat-label">Resolved Reports</span>
+      </div>
+    </div>
+
+    <!-- RESET DATA BAR -->
+    <div class="admin-reset-bar">
+      <div>
+        <h3 style="font-size: 1.1rem; color: #0b192c; font-weight: 800; margin-bottom: 2px;">Database Operations</h3>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0;">Reset or restore data to default state</p>
+      </div>
+      <button class="btn btn-danger btn-reset-demo" onclick="resetAdminDemoData()">
+        ⚠️ Reset Data
+      </button>
+    </div>
+
+    <!-- 2. SECTION: MANAGE PARKING -->
+    <section class="admin-section-card">
+      <div class="dash-table-header">
+        <div>
+          <h2 class="results-title">Manage Parking</h2>
+          <p class="section-subtitle" style="text-align: left; margin-bottom: 0;">Add, Edit, or Delete parking locations</p>
+        </div>
+        <button class="btn-icon-plus" title="Add Parking" aria-label="Add Parking" onclick="openAddParkingModal()">
+          +
+        </button>
+      </div>
+
+      <!-- Desktop Table -->
+      <div class="table-responsive admin-desktop-table">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Parking Name</th>
+              <th>Location</th>
+              <th>Capacity</th>
+              <th>Available</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminParkingTbody">
+            <!-- Dynamically populated from LocalStorage "ParkingData" -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Cards -->
+      <div class="admin-mobile-cards" id="adminParkingCards"></div>
+    </section>
+
+    <!-- 3. SECTION: MANAGE REPORTS -->
+    <section class="admin-section-card">
+      <div class="dash-table-header">
+        <div>
+          <h2 class="results-title">Manage Reports</h2>
+          <p class="section-subtitle" style="text-align: left; margin-bottom: 0;">View citizen reports or delete complaints</p>
+        </div>
+      </div>
+
+      <!-- Desktop Table -->
+      <div class="table-responsive admin-desktop-table">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Problem</th>
+              <th>Location</th>
+              <th>Vehicle</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminReportsTbody">
+            <!-- Dynamically populated from LocalStorage "reports" -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Cards -->
+      <div class="admin-mobile-cards" id="adminReportsCards"></div>
+    </section>
+
+    <!-- 4. SECTION: MANAGE USERS -->
+    <section class="admin-section-card">
+      <div class="dash-table-header">
+        <div>
+          <h2 class="results-title">Manage Users</h2>
+          <p class="section-subtitle" style="text-align: left; margin-bottom: 0;">Add, update, or remove registered citizens, police officers, and administrators</p>
+        </div>
+        <button class="btn-icon-plus" title="Add User" aria-label="Add User" onclick="openAddUserModal()">
+          +
+        </button>
+      </div>
+
+      <!-- Desktop Table -->
+      <div class="table-responsive admin-desktop-table">
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Phone</th>
+              <th>Registration Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminUsersTbody">
+            <!-- Dynamically populated from LocalStorage "UsersData" -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Cards -->
+      <div class="admin-mobile-cards" id="adminUsersCards"></div>
+    </section>
+
+  </main>
+
+  <!-- ADD / EDIT USER MODAL -->
+  <div class="modal-overlay hidden" id="adminUserModal">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="modal-badge">User Account Management</span>
+          <h3 id="userModalTitle">Add User</h3>
+        </div>
+        <button class="modal-close" type="button" onclick="closeAdminUserModal()">✕</button>
+      </div>
+
+      <form id="adminUserForm" onsubmit="saveAdminUserForm(event)">
+        <div class="modal-body" style="padding: 20px 24px;">
+          <input type="hidden" id="inputUserId" />
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="inputUserName">Full Name <span class="required">*</span></label>
+            <input type="text" id="inputUserName" class="form-input" placeholder="e.g. Anand Kumar" required />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="inputUserEmail">Email Address <span class="required">*</span></label>
+            <input type="email" id="inputUserEmail" class="form-input" placeholder="e.g. anand@smartpark.in" required />
+          </div>
+
+          <div class="form-row" style="margin-bottom: 0;">
+            <div class="form-group col-half">
+              <label class="form-label" for="inputUserRole">Role <span class="required">*</span></label>
+              <select id="inputUserRole" class="form-input" style="padding: 10px 14px;" required>
+                <option value="Citizen">Citizen</option>
+                <option value="Police">Police</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+            <div class="form-group col-half">
+              <label class="form-label" for="inputUserPhone">Phone Number <span class="required">*</span></label>
+              <input type="tel" id="inputUserPhone" class="form-input" placeholder="9876543210" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding: 16px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; background: #f8fafc; border-top: 1px solid var(--color-border);">
+          <button type="button" class="btn btn-outline btn-md" onclick="closeAdminUserModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary btn-md" style="font-weight: 700; min-width: 120px;">
+            Save User
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT PARKING MODAL -->
+  <div class="modal-overlay hidden" id="adminParkingModal">
+    <div class="modal-box" style="max-width: 500px;">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="modal-badge">Parking Location Setup</span>
+          <h3 id="parkingModalTitle">Add Parking Location</h3>
+        </div>
+        <button class="modal-close" onclick="closeAdminParkingModal()">✕</button>
+      </div>
+
+      <form id="adminParkingForm" onsubmit="saveAdminParkingForm(event)">
+        <div class="modal-body" style="padding: 20px 24px;">
+          <input type="hidden" id="inputParkingId" />
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="inputParkingName">Location Name <span class="required">*</span></label>
+            <input type="text" id="inputParkingName" class="form-input" placeholder="e.g. Rock Beach Promenade Zone" required />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="inputParkingLocation">Address / Street <span class="required">*</span></label>
+            <input type="text" id="inputParkingLocation" class="form-input" placeholder="e.g. Goubert Avenue, White Town" required />
+          </div>
+
+          <div class="form-row" style="margin-bottom: 0;">
+            <div class="form-group col-half">
+              <label class="form-label" for="inputParkingTotal">Total Spaces <span class="required">*</span></label>
+              <input type="number" id="inputParkingTotal" class="form-input" min="1" placeholder="80" required />
+            </div>
+            <div class="form-group col-half">
+              <label class="form-label" for="inputParkingAvailable">Available Spaces <span class="required">*</span></label>
+              <input type="number" id="inputParkingAvailable" class="form-input" min="0" placeholder="30" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding: 16px 24px; display: flex; justify-content: flex-end; align-items: center; gap: 12px; background: #f8fafc; border-top: 1px solid var(--color-border);">
+          <button type="button" class="btn btn-outline btn-md" onclick="closeAdminParkingModal()">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary btn-md" style="font-weight: 700; min-width: 130px;">
+            Save Parking
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DETAILS MODAL FOR REPORTS -->
+  <div class="modal-overlay hidden" id="reportDetailsModal">
+    <div class="modal-box modal-report-details-box">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="modal-badge">Puducherry Incident Record</span>
+          <h3 id="modalReportTitle">Report Details</h3>
+        </div>
+        <button class="modal-close" onclick="closeReportModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalReportBody"></div>
+      <div class="modal-footer modal-footer-actions">
+        <button type="button" class="btn btn-primary btn-close-modal" onclick="closeReportModal()">
+          Close Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>&copy; 2026 Smartpark Puducherry. City Administration & Smart City Operations.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

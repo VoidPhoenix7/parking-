@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smartpark Puducherry - My Reports</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- 1. NAVIGATION BAR -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <!-- Indian Police Emblem Badge -->
+        <div class="brand-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">Smartpark Puducherry</span>
+          <span class="brand-tag">TRAFFIC ENFORCEMENT & CITIZEN PORTAL</span>
+        </div>
+      </a>
+
+      <!-- Hamburger toggle button for Mobile -->
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu" id="navLinks">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="find-parking.html" class="nav-link">Find Parking</a>
+        <a href="report.html" class="nav-link">Report</a>
+        <a href="my-reports.html" class="nav-link active">My Reports</a>
+        <a href="login.html" class="nav-link nav-btn-login">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 2. PAGE HEADER -->
+  <section class="page-header">
+    <div class="container text-center">
+      <span class="page-badge">Citizen Tracking Portal</span>
+      <h1 class="page-title">My Reports</h1>
+      <p class="page-subtitle">Track the real-time status of your submitted traffic and parking complaints</p>
+    </div>
+  </section>
+
+  <!-- 3. MAIN CONTENT: STATS, FILTER BAR, CARDS GRID -->
+  <main class="container my-40">
+
+    <!-- SUMMARY PILLS & SEARCH / FILTERS -->
+    <div class="controls-card">
+      <div class="reports-filter-header">
+        <div class="reports-search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            id="reportSearchInput" 
+            placeholder="Search by Report ID, Location, or Vehicle Number..." 
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="new-report-btn-wrapper">
+          <a href="report.html" class="btn btn-danger btn-sm-new">
+            + Report New Violation
+          </a>
+        </div>
+      </div>
+
+      <!-- STATUS FILTER BUTTONS -->
+      <div class="filter-group">
+        <span class="filter-label">Filter by Status:</span>
+        <button class="filter-btn active" data-status="all">All</button>
+        <button class="filter-btn filter-submitted" data-status="Submitted">
+          <span class="status-circle bg-dot-blue"></span> Submitted
+        </button>
+        <button class="filter-btn filter-under-review" data-status="Under Review">
+          <span class="status-circle bg-dot-yellow"></span> Under Review
+        </button>
+        <button class="filter-btn filter-resolved" data-status="Resolved">
+          <span class="status-circle bg-dot-green"></span> Resolved
+        </button>
+        <button class="filter-btn filter-rejected" data-status="Rejected">
+          <span class="status-circle bg-dot-red"></span> Rejected
+        </button>
+      </div>
+    </div>
+
+    <!-- HEADER FOR REPORT CARDS -->
+    <div class="parking-results-header">
+      <h2 class="results-title">Submitted Citizen Complaints</h2>
+      <span class="results-count" id="reportsCount">Loading reports from LocalStorage...</span>
+    </div>
+
+    <!-- CARDS GRID CONTAINER -->
+    <div class="reports-grid" id="reportsGrid">
+      <!-- Injected dynamically from LocalStorage "reports" -->
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div id="noReportsFound" class="no-results hidden">
+      <div class="no-results-icon">📋</div>
+      <h3>No Reports Found</h3>
+      <p>No complaints match your current filter. You can submit a new violation report anytime.</p>
+      <a href="report.html" class="btn btn-primary" style="margin-top: 16px;">
+        Report a Violation
+      </a>
+    </div>
+
+  </main>
+
+  <!-- 4. REPORT DETAILS MODAL POPUP -->
+  <div class="modal-overlay hidden" id="reportDetailsModal">
+    <div class="modal-box modal-report-details-box">
+      <div class="modal-header" id="modalHeaderStatus">
+        <div class="modal-header-info">
+          <span class="modal-badge">Puducherry Traffic Police Case File</span>
+          <h3 id="modalReportTitle">Report PS-001</h3>
+        </div>
+        <button class="modal-close" onclick="closeReportModal()">✕</button>
+      </div>
+
+      <div class="modal-body" id="modalReportBody">
+        <!-- Content inserted dynamically -->
+      </div>
+
+      <div class="modal-footer modal-footer-actions">
+        <button type="button" class="btn btn-primary btn-close-modal" onclick="closeReportModal()">
+          Close Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. FOOTER -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="brand-shield footer-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="footer-title">Smartpark Puducherry</span>
+      </div>
+      <p class="footer-text">
+        Making parking easier and roads safer for citizens and tourists across Puducherry.
+      </p>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Smartpark Puducherry. Puducherry Police Traffic Enforcement & Municipal Administration.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

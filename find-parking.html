@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smartpark Puducherry - Find Parking</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- 1. NAVIGATION BAR -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <!-- Indian Police & Traffic Enforcement Emblem Badge -->
+        <div class="brand-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">Smartpark Puducherry</span>
+          <span class="brand-tag">TRAFFIC ENFORCEMENT & CITIZEN PORTAL</span>
+        </div>
+      </a>
+
+      <!-- Hamburger toggle button for Mobile -->
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu" id="navLinks">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="find-parking.html" class="nav-link active">Find Parking</a>
+        <a href="report.html" class="nav-link">Report</a>
+        <a href="my-reports.html" class="nav-link">My Reports</a>
+        <a href="login.html" class="nav-link nav-btn-login">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 2. PAGE HEADER -->
+  <section class="page-header">
+    <div class="container text-center">
+      <span class="page-badge">Real-time Spot Finder</span>
+      <h1 class="page-title">Find Parking Spaces</h1>
+      <p class="page-subtitle">Check real-time parking space availability across Puducherry city</p>
+    </div>
+  </section>
+
+  <!-- 3. MAIN CONTENT: SEARCH, FILTERS, MAP & CARDS -->
+  <main class="container my-40">
+
+    <!-- SEARCH & FILTER CONTROLS -->
+    <div class="controls-card">
+      <!-- Search Input -->
+      <div class="search-box-wrapper">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Search parking location (e.g. White Town, MG Road)..." 
+          autocomplete="off"
+        />
+        <button id="clearSearchBtn" class="clear-btn" title="Clear search">✕</button>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="filter-group">
+        <span class="filter-label">Filter by:</span>
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn filter-available" data-filter="available">
+          <span class="status-circle bg-dot-green"></span> Available
+        </button>
+        <button class="filter-btn filter-limited" data-filter="limited">
+          <span class="status-circle bg-dot-yellow"></span> Limited
+        </button>
+        <button class="filter-btn filter-full" data-filter="full">
+          <span class="status-circle bg-dot-red"></span> Full
+        </button>
+      </div>
+    </div>
+
+    <!-- 4. PUDUCHERRY CITY MAP (CSS / HTML Map) -->
+    <div class="map-section-wrapper">
+      <div class="map-header">
+        <div>
+          <h3 class="map-title">📍 Puducherry City Parking Map</h3>
+          <p class="map-subtitle">Click any marker to jump to its parking details</p>
+        </div>
+        <div class="map-legend">
+          <span class="legend-item"><span class="marker-dot marker-green"></span> Lots Available</span>
+          <span class="legend-item"><span class="marker-dot marker-yellow"></span> Limited</span>
+          <span class="legend-item"><span class="marker-dot marker-red"></span> Full</span>
+        </div>
+      </div>
+
+      <!-- Fake Interactive Map -->
+      <div class="fake-map" id="fakeMap">
+        <!-- Bay of Bengal Coastline -->
+        <div class="map-sea">
+          <span class="sea-label">🌊 Bay of Bengal</span>
+        </div>
+
+        <!-- Major Road guides -->
+        <div class="road road-h-1"><span>Goubert Avenue / Promenade Beach</span></div>
+        <div class="road road-h-2"><span>Mahatma Gandhi Road</span></div>
+        <div class="road road-v-1"><span>Mission Street</span></div>
+        <div class="road road-v-2"><span>Bussy Street</span></div>
+
+        <!-- 6 Interactive Location Markers -->
+        <!-- 1. White Town -->
+        <div class="map-pin pin-1" onclick="focusParkingCard('PK-1')" title="White Town Parking">
+          <span class="pin-badge marker-green">32</span>
+          <span class="pin-label">White Town</span>
+        </div>
+
+        <!-- 2. Heritage Town -->
+        <div class="map-pin pin-2" onclick="focusParkingCard('PK-2')" title="Heritage Town Parking">
+          <span class="pin-badge marker-yellow">8</span>
+          <span class="pin-label">Heritage Town</span>
+        </div>
+
+        <!-- 3. MG Road -->
+        <div class="map-pin pin-3" onclick="focusParkingCard('PK-3')" title="MG Road Parking">
+          <span class="pin-badge marker-green">45</span>
+          <span class="pin-label">MG Road</span>
+        </div>
+
+        <!-- 4. Mission Street -->
+        <div class="map-pin pin-4" onclick="focusParkingCard('PK-4')" title="Mission Street Parking">
+          <span class="pin-badge marker-red">0</span>
+          <span class="pin-label">Mission Street</span>
+        </div>
+
+        <!-- 5. Muthialpet -->
+        <div class="map-pin pin-5" onclick="focusParkingCard('PK-5')" title="Muthialpet Parking">
+          <span class="pin-badge marker-green">22</span>
+          <span class="pin-label">Muthialpet</span>
+        </div>
+
+        <!-- 6. Lawspet -->
+        <div class="map-pin pin-6" onclick="focusParkingCard('PK-6')" title="Lawspet Parking">
+          <span class="pin-badge marker-yellow">6</span>
+          <span class="pin-label">Lawspet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. PARKING CARDS SECTION -->
+    <div class="parking-results-header">
+      <h2 class="results-title">Parking Locations in Puducherry</h2>
+      <span class="results-count" id="resultsCount">Showing 6 locations</span>
+    </div>
+
+    <!-- Grid Container for Parking Cards -->
+    <div class="parking-grid" id="parkingGrid">
+      <!-- Parking cards will be injected by JavaScript -->
+    </div>
+
+    <!-- Empty state message if search finds nothing -->
+    <div id="noResultsMsg" class="no-results hidden">
+      <div class="no-results-icon">🔎</div>
+      <h3>No Parking Locations Found</h3>
+      <p>Try searching for a different area like "White Town" or change your filter.</p>
+    </div>
+
+  </main>
+
+  <!-- 6. DETAILS MODAL POPUP -->
+  <div class="modal-overlay hidden" id="detailsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="modal-badge">Parking Location Details</span>
+          <h3 id="modalName">Parking Details</h3>
+        </div>
+        <button class="modal-close" onclick="closeModal()" aria-label="Close dialog">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content inserted dynamically with proper address and two/four-wheeler rates -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary btn-modal-done" onclick="closeModal()">
+          ✓ Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. FOOTER -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="brand-shield footer-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="footer-title">Smartpark Puducherry</span>
+      </div>
+      <p class="footer-text">
+        Making parking easier and roads safer for citizens and tourists across Puducherry.
+      </p>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Smartpark Puducherry. Puducherry Police Traffic Enforcement & Municipal Administration.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

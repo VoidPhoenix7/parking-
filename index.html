@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smartpark Puducherry</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts: Inter & Outfit for clean, professional typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- 1. NAVIGATION BAR -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="brand">
+        <!-- Indian Police & Traffic Enforcement Emblem Badge -->
+        <div class="brand-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <!-- Ashoka 24-spoke stylized chakra / Star & P emblem -->
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <span class="brand-name">Smartpark Puducherry</span>
+          <span class="brand-tag">TRAFFIC ENFORCEMENT & CITIZEN PORTAL</span>
+        </div>
+      </a>
+
+      <!-- Hamburger toggle button for Mobile -->
+      <button class="hamburger" id="hamburgerBtn" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu" id="navLinks">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="find-parking.html" class="nav-link">Find Parking</a>
+        <a href="report.html" class="nav-link">Report</a>
+        <a href="my-reports.html" class="nav-link">My Reports</a>
+        <a href="login.html" class="nav-link nav-btn-login">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 2. HERO SECTION -->
+  <section class="hero-section" id="home">
+    <div class="container hero-content">
+      <div class="hero-badge">Smart City Puducherry</div>
+      <h1 class="hero-title">Smart Parking. Safer Roads.</h1>
+      <p class="hero-desc">
+        Find parking, report traffic violations, and help make Puducherry safer.
+      </p>
+
+      <!-- Two Large Action Buttons -->
+      <div class="hero-buttons">
+        <a href="find-parking.html" class="btn btn-primary btn-large">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5H6.5C5.84 5 5.28 5.42 5.08 6.01L3 12V20C3 20.55 3.45 21 4 21H5C5.55 21 6 20.55 6 20V19H18V20C18 20.55 18.45 21 19 21H20C20.55 21 21 20.55 21 20V12L18.92 6.01ZM6.5 16C5.67 16 5 15.33 5 14.5C5 13.67 5.67 13 6.5 13C7.33 13 8 13.67 8 14.5C8 15.33 7.33 16 6.5 16ZM17.5 16C16.67 16 16 15.33 16 14.5C16 13.67 16.67 13 17.5 13C18.33 13 19 13.67 19 14.5C19 15.33 18.33 16 17.5 16ZM5 11L6.5 6.5H17.5L19 11H5Z"/>
+          </svg>
+          Find Parking
+        </a>
+        <a href="report.html" class="btn btn-danger btn-large">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M1 21H23L12 2L1 21ZM13 18H11V16H13V18ZM13 14H11V10H13V14Z"/>
+          </svg>
+          Report a Violation
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. HOW SMARTPARK WORKS SECTION -->
+  <section class="how-it-works-section" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">How SmartPark Works</h2>
+        <p class="section-subtitle">Three easy steps to make city parking and traffic enforcement effortless</p>
+      </div>
+
+      <div class="steps-grid">
+        <!-- Step 1: Find Parking Link -->
+        <a href="find-parking.html" class="step-card step-card-link">
+          <div class="step-number">1</div>
+          <div class="step-icon bg-blue">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0066CC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <h3 class="step-title">Find Parking</h3>
+          <p class="step-desc">
+            Check real-time parking space availability across Puducherry before you start your ride.
+          </p>
+          <span class="step-action-tag">Open Spot Finder →</span>
+        </a>
+
+        <!-- Step 2: Report Problems Link -->
+        <a href="report.html" class="step-card step-card-link">
+          <div class="step-number">2</div>
+          <div class="step-icon bg-red">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </div>
+          <h3 class="step-title">Report Problems</h3>
+          <p class="step-desc">
+            Quickly submit reports for illegal parking, blocked footpaths, or traffic obstructions.
+          </p>
+          <span class="step-action-tag">File Complaint →</span>
+        </a>
+
+        <!-- Step 3: Track Reports Link -->
+        <a href="my-reports.html" class="step-card step-card-link">
+          <div class="step-number">3</div>
+          <div class="step-icon bg-yellow">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              <path d="M9 14l2 2 4-4"></path>
+            </svg>
+          </div>
+          <h3 class="step-title">Track Reports</h3>
+          <p class="step-desc">
+            Monitor updates on your report and see actions taken by Puducherry traffic authorities.
+          </p>
+          <span class="step-action-tag">Check Status →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. STATISTICS SECTION -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-container">
+        <!-- Stat 1 -->
+        <div class="stat-box">
+          <div class="stat-number color-green">120+</div>
+          <div class="stat-label">Parking Spaces</div>
+        </div>
+
+        <!-- Divider line for desktop -->
+        <div class="stat-divider"></div>
+
+        <!-- Stat 2 -->
+        <div class="stat-box">
+          <div class="stat-number color-yellow">250+</div>
+          <div class="stat-label">Reports Submitted</div>
+        </div>
+
+        <!-- Divider line for desktop -->
+        <div class="stat-divider"></div>
+
+        <!-- Stat 3 -->
+        <div class="stat-box">
+          <div class="stat-number color-blue">30+</div>
+          <div class="stat-label">Areas Covered</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. FOOTER -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="brand-shield footer-shield">
+          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
+            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
+            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
+            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="footer-title">Smartpark Puducherry</span>
+      </div>
+      <p class="footer-text">
+        Making parking easier and roads safer for citizens and tourists across Puducherry.
+      </p>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Smartpark Puducherry. Puducherry Police Traffic Enforcement & Municipal Administration.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
