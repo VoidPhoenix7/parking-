@@ -42,6 +42,7 @@
       <nav class="nav-menu" id="navLinks">
         <a href="index.html" class="nav-link">Home</a>
         <a href="find-parking.html" class="nav-link active">Find Parking</a>
+        <a href="my-bookings.html" class="nav-link">My Bookings</a>
         <a href="report.html" class="nav-link">Report</a>
         <a href="my-reports.html" class="nav-link">My Reports</a>
         <a href="login.html" class="nav-link nav-btn-login">Login</a>
@@ -200,6 +201,194 @@
       <div class="modal-footer">
         <button class="btn btn-primary btn-modal-done" onclick="closeModal()">
           ✓ Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6B. BOOK PARKING MODAL POPUP -->
+  <div class="modal-overlay hidden" id="bookingModal">
+    <div class="modal-box modal-box-lg">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="modal-badge">Instant Reservation</span>
+          <h3 id="bookingModalTitle">Book a Parking Slot</h3>
+        </div>
+        <button class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">✕</button>
+      </div>
+
+      <form id="bookingForm" onsubmit="handleBookingFormSubmit(event)">
+        <div class="modal-body">
+          <!-- Error Alert Banner -->
+          <div id="bookingErrorAlert" class="booking-error-banner hidden"></div>
+
+          <!-- Parking Location Info Box -->
+          <div class="booking-location-card">
+            <div class="bloc-header">
+              <h4 id="bookParkingName">White Town Parking</h4>
+              <span class="bloc-badge" id="bookParkingStatus">OPEN</span>
+            </div>
+            <p class="bloc-address" id="bookParkingAddress">📍 Location address</p>
+            <div class="bloc-meta">
+              <span>🕒 <strong>Hours:</strong> <span id="bookParkingTimings">06:00 AM - 11:00 PM</span></span>
+              <span>🅿️ <strong>Available Right Now:</strong> <span id="bookParkingCurrentAvail" class="color-green">0</span></span>
+              <span>💰 <strong>Hourly Rate:</strong> ₹<span id="bookParkingHourlyRate">20</span>/hr</span>
+            </div>
+          </div>
+
+          <!-- Form Fields -->
+          <div class="booking-form-grid">
+            <!-- User Name -->
+            <div class="form-group">
+              <label for="bookUserName">Full Name <span class="text-red">*</span></label>
+              <input type="text" id="bookUserName" class="form-control" placeholder="Enter your full name" required />
+            </div>
+
+            <!-- Vehicle Number -->
+            <div class="form-group">
+              <label for="bookVehicleNumber">Vehicle Registration Number <span class="text-red">*</span></label>
+              <input type="text" id="bookVehicleNumber" class="form-control" placeholder="e.g. PY-01-AB-1234" style="text-transform: uppercase;" required />
+            </div>
+
+            <!-- Booking Date -->
+            <div class="form-group">
+              <label for="bookDate">Booking Date <span class="text-red">*</span></label>
+              <input type="date" id="bookDate" class="form-control" required />
+            </div>
+
+            <!-- Number of Slots -->
+            <div class="form-group">
+              <label for="bookSlotsCount">Number of Slots (Max 3) <span class="text-red">*</span></label>
+              <select id="bookSlotsCount" class="form-control" required>
+                <option value="1">1 Slot</option>
+                <option value="2">2 Slots</option>
+                <option value="3">3 Slots</option>
+              </select>
+              <small class="form-hint">Rule: Maximum 3 slots per booking</small>
+            </div>
+
+            <!-- Arrival Time -->
+            <div class="form-group">
+              <label for="bookArrivalTime">Expected Arrival Time <span class="text-red">*</span></label>
+              <input type="time" id="bookArrivalTime" class="form-control" required />
+              <small class="form-hint">Rule: At least 15 mins from now</small>
+            </div>
+
+            <!-- Departure Time -->
+            <div class="form-group">
+              <label for="bookDepartureTime">Expected Departure Time <span class="text-red">*</span></label>
+              <input type="time" id="bookDepartureTime" class="form-control" required />
+              <small class="form-hint">Must be after arrival time</small>
+            </div>
+          </div>
+
+          <!-- Real-Time Booking Summary & Live Calculation -->
+          <div class="booking-summary-card">
+            <h4 class="summary-heading">💳 Booking Summary & Pricing</h4>
+            <div class="summary-row">
+              <span class="summary-label">Selected Parking:</span>
+              <span class="summary-value" id="sumParkingName">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Slots to Reserve:</span>
+              <span class="summary-value" id="sumSlotsCount">1 Slot</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Arrival:</span>
+              <span class="summary-value" id="sumArrival">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Departure:</span>
+              <span class="summary-value" id="sumDeparture">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Calculated Duration:</span>
+              <span class="summary-value summary-highlight" id="sumDuration">0 hours</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Rate per Slot:</span>
+              <span class="summary-value" id="sumHourlyRate">₹20 / hour</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row total-row">
+              <span class="summary-total-label">Total Amount Payable:</span>
+              <span class="summary-total-value" id="sumTotalPrice">₹0</span>
+            </div>
+            <div class="summary-calculation-note" id="sumCalcFormula">
+              Formula: Slots × Hourly Rate × Duration
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeBookingModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnConfirmBooking">
+            ✓ Confirm Booking
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6C. BOOKING CONFIRMATION SUCCESS MODAL -->
+  <div class="modal-overlay hidden" id="bookingSuccessModal">
+    <div class="modal-box">
+      <div class="success-icon-badge">🎉</div>
+      <div class="modal-header text-center" style="border-bottom:none; padding-bottom: 0;">
+        <h3 style="color:#0f172a; margin: 0 auto; font-size:1.4rem;">Parking booked successfully!</h3>
+        <p style="color:#64748b; font-size:0.88rem; margin-top:4px;">Your reservation is confirmed in Puducherry Smart Grid</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="booking-ticket-receipt">
+          <div class="ticket-header">
+            <span class="ticket-id-tag" id="ticketBookingId">PSB-001</span>
+            <span class="ticket-status-tag">CONFIRMED</span>
+          </div>
+
+          <div class="ticket-grid">
+            <div class="ticket-item">
+              <span class="t-label">Location</span>
+              <span class="t-value" id="ticketLocation">-</span>
+            </div>
+            <div class="ticket-item">
+              <span class="t-label">Vehicle No</span>
+              <span class="t-value" id="ticketVehicle">-</span>
+            </div>
+            <div class="ticket-item">
+              <span class="t-label">Booked Slots</span>
+              <span class="t-value" id="ticketSlots">-</span>
+            </div>
+            <div class="ticket-item">
+              <span class="t-label">Date</span>
+              <span class="t-value" id="ticketDate">-</span>
+            </div>
+            <div class="ticket-item">
+              <span class="t-label">Arrival</span>
+              <span class="t-value" id="ticketArrival">-</span>
+            </div>
+            <div class="ticket-item">
+              <span class="t-label">Departure</span>
+              <span class="t-value" id="ticketDeparture">-</span>
+            </div>
+            <div class="ticket-item">
+              <span class="t-label">Duration</span>
+              <span class="t-value" id="ticketDuration">-</span>
+            </div>
+            <div class="ticket-item">
+              <span class="t-label">Total Price</span>
+              <span class="t-value color-green font-bold" id="ticketPrice">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="flex-wrap: wrap; justify-content: center; gap: 10px;">
+        <a href="my-bookings.html" class="btn btn-primary" style="flex: 1; min-width: 160px; text-align: center;">
+          📋 View in My Bookings
+        </a>
+        <button type="button" class="btn btn-outline" onclick="closeBookingSuccessModal()" style="flex: 1; min-width: 140px;">
+          Close
         </button>
       </div>
     </div>

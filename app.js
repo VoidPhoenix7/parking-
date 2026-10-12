@@ -9,6 +9,7 @@
 // LocalStorage Keys
 const PARKING_STORAGE_KEY = "ParkingData";
 const PARKING_LAST_UPDATED_KEY = "ParkingLastUpdatedTimestamp"; // 1-Hour dynamic interval tracker
+const BOOKINGS_STORAGE_KEY = "parkingBookings"; // User bookings data as specified in requirements
 const REPORTS_STORAGE_KEY = "reports";
 const USER_STORAGE_KEY = "Current User"; // As requested by user
 const PROFILE_STORAGE_KEY = "UserProfileData"; // User profile details
@@ -2244,6 +2245,8 @@ function renderParkingCards() {
     }
 
     const percent = Math.min(100, Math.round((lot.availableSpaces / lot.totalSpaces) * 100));
+    const isClosed = (lot.status || '').toUpperCase() === 'CLOSED';
+    const isFull = lot.availableSpaces === 0;
 
     return `
       <div class="parking-card" id="card-${lot.id}">
@@ -2251,8 +2254,8 @@ function renderParkingCards() {
         <div class="card-content">
           <div class="card-header-row">
             <h3 class="card-title">${lot.name}</h3>
-            <span class="status-badge ${lot.status === 'OPEN' ? 'badge-open' : 'badge-closed'}">
-              ${lot.status}
+            <span class="status-badge ${isClosed ? 'badge-closed' : 'badge-open'}">
+              ${isClosed ? 'CLOSED' : 'OPEN'}
             </span>
           </div>
 
@@ -2263,11 +2266,11 @@ function renderParkingCards() {
 
           <div class="card-metrics-box">
             <div class="metric-row">
-              <span class="metric-label">Total Spaces:</span>
-              <span class="metric-value">${lot.totalSpaces}</span>
+              <span class="metric-label">Total Parking Slots:</span>
+              <span class="metric-value font-bold">${lot.totalSpaces}</span>
             </div>
             <div class="metric-row">
-              <span class="metric-label">Available Spaces:</span>
+              <span class="metric-label">Available Slots:</span>
               <span class="metric-value metric-highlight ${colorClass}">
                 ${lot.availableSpaces} Available
               </span>
@@ -2278,22 +2281,31 @@ function renderParkingCards() {
             </div>
           </div>
 
-          <div class="card-pricing-block">
-            <div class="pricing-item">
-              <span class="pricing-type">🏍️ 2-Wheeler</span>
-              <span class="pricing-rate">₹${lot.twoWheelerPrice || 20}<small style="font-size:0.7rem; font-weight:normal; color:#64748b;">/hr</small></span>
+          <!-- Pricing & Timings Row -->
+          <div class="card-pricing-block" style="display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.84rem; color:#64748b; font-weight:600;">💰 Price per Hour:</span>
+              <span style="font-size:0.95rem; color:#0f172a; font-weight:800;">₹${lot.price || lot.twoWheelerPrice || 20}/hr</span>
             </div>
-            <div class="pricing-divider"></div>
-            <div class="pricing-item">
-              <span class="pricing-type">🚗 4-Wheeler</span>
-              <span class="pricing-rate">₹${lot.fourWheelerPrice || 40}<small style="font-size:0.7rem; font-weight:normal; color:#64748b;">/hr</small></span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.84rem; color:#64748b; font-weight:600;">🕒 Opening & Closing:</span>
+              <span style="font-size:0.84rem; color:#334155; font-weight:700;">${lot.timings || '06:00 AM - 11:00 PM'}</span>
             </div>
           </div>
 
-          <div class="card-footer-row">
-            <button class="btn-details" onclick="openDetailsModal('${lot.id}')">
-              View Details
-            </button>
+          <div class="card-footer-row" style="margin-top:12px;">
+            <div class="card-actions-group">
+              <button class="btn btn-details" onclick="openDetailsModal('${lot.id}')" style="flex:1;">
+                Details
+              </button>
+              <button 
+                class="btn btn-book-slot ${isClosed || isFull ? 'btn-disabled' : ''}" 
+                onclick="openBookingModal('${lot.id}')"
+                ${isClosed ? 'disabled title="Location is currently closed"' : (isFull ? 'title="Currently Full - you may reserve ahead"' : '')}
+              >
+                🎟️ Book Parking
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -2375,6 +2387,630 @@ function closeModal() {
     document.body.style.overflow = "auto";
   }
 }
+
+/* =========================================================
+   PARKING BOOKING & AVAILABILITY MANAGEMENT ENGINE
+   - LocalStorage key: "parkingBookings"
+   - Rules: Max 3 slots, at least 15 mins before arrival from actual current time
+   - No past date/time, arrival < departure, within opening hours
+   - Availability calculation prevents overlapping double bookings
+   ========================================================= */
+let activeBookingLotId = null;
+
+function getBookings() {
+  const data = localStorage.getItem(BOOKINGS_STORAGE_KEY);
+  try {
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveBookings(bookingsList) {
+  localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookingsList));
+}
+
+// Convert "HH:MM" or "06:00 AM" into minutes from start of day
+function parseTimeToMinutes(timeStr) {
+  if (!timeStr) return 0;
+  const str = timeStr.trim();
+  // Check if standard 24h format "HH:MM"
+  if (/^\d{1,2}:\d{2}$/.test(str)) {
+    const [h, m] = str.split(":").map(Number);
+    return h * 60 + m;
+  }
+  // Check 12h format "06:00 AM"
+  const match = str.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (match) {
+    let hours = parseInt(match[1], 10);
+    const mins = parseInt(match[2], 10);
+    const meridiem = (match[3] || '').toUpperCase();
+    if (meridiem === 'PM' && hours < 12) hours += 12;
+    if (meridiem === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + mins;
+  }
+  return 0;
+}
+
+// Extract opening and closing minutes for a parking location
+function getParkingHoursRange(timingsStr) {
+  if (!timingsStr || timingsStr.toLowerCase().includes("24 hours")) {
+    return { openMins: 0, closeMins: 24 * 60, is24Hours: true };
+  }
+  // Example format: "06:00 AM - 11:00 PM"
+  const parts = timingsStr.split("-");
+  if (parts.length >= 2) {
+    const openMins = parseTimeToMinutes(parts[0]);
+    const closeMins = parseTimeToMinutes(parts[1]);
+    return { openMins, closeMins, is24Hours: false };
+  }
+  return { openMins: 0, closeMins: 24 * 60, is24Hours: true };
+}
+
+// Calculate available slots for a specific parking lot during a specific time interval
+function calculateAvailableSlotsForInterval(lotId, targetDateStr, startMins, endMins) {
+  const parkingLots = getParkingData();
+  const lot = parkingLots.find(p => p.id === lotId);
+  if (!lot) return 0;
+
+  // Capacity baseline
+  const totalCapacity = lot.totalSpaces;
+  const currentBaselineAvailable = lot.availableSpaces;
+
+  // Find confirmed bookings for this lot on the target date that overlap with the interval
+  const allBookings = getBookings();
+  const overlappingBookings = allBookings.filter(b => {
+    if (b.parkingId !== lotId) return false;
+    if (b.bookingStatus !== 'Confirmed') return false;
+    if (b.bookingDate !== targetDateStr) return false;
+
+    const bStart = parseTimeToMinutes(b.arrivalTime);
+    const bEnd = parseTimeToMinutes(b.departureTime);
+
+    // Overlap condition: intervals overlap if max(start1, start2) < min(end1, end2)
+    return Math.max(startMins, bStart) < Math.min(endMins, bEnd);
+  });
+
+  const reservedSlots = overlappingBookings.reduce((sum, b) => sum + (Number(b.numberOfSlots) || 1), 0);
+  
+  // Available slots for that period cannot exceed total spaces minus overlapping reservations
+  const remainingForInterval = Math.max(0, currentBaselineAvailable - reservedSlots);
+  return remainingForInterval;
+}
+
+function openBookingModal(lotId) {
+  const parkingLots = getParkingData();
+  const lot = parkingLots.find(p => p.id === lotId);
+  if (!lot) return;
+
+  if ((lot.status || '').toUpperCase() === 'CLOSED') {
+    alert(`Sorry, "${lot.name}" is currently closed and not accepting bookings.`);
+    return;
+  }
+
+  activeBookingLotId = lotId;
+  const modal = document.getElementById("bookingModal");
+  if (!modal) return;
+
+  // Populate lot header
+  document.getElementById("bookParkingName").textContent = lot.name;
+  document.getElementById("bookParkingAddress").textContent = `📍 ${lot.location}`;
+  document.getElementById("bookParkingTimings").textContent = lot.timings || '06:00 AM - 11:00 PM';
+  document.getElementById("bookParkingCurrentAvail").textContent = `${lot.availableSpaces} Slots`;
+  document.getElementById("bookParkingHourlyRate").textContent = lot.price || lot.twoWheelerPrice || 20;
+
+  const statusBadge = document.getElementById("bookParkingStatus");
+  if (statusBadge) {
+    statusBadge.textContent = lot.status;
+    statusBadge.className = `bloc-badge ${lot.status === 'OPEN' ? '' : 'closed'}`;
+  }
+
+  // Pre-fill Defaults
+  // Autofill user name from profile if available
+  const profile = getUserProfile();
+  const nameInput = document.getElementById("bookUserName");
+  if (nameInput) nameInput.value = profile.name || "";
+
+  // Set default booking date to today
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+  const dateInput = document.getElementById("bookDate");
+  if (dateInput) {
+    dateInput.value = todayStr;
+    dateInput.min = todayStr; // Prevent picking past dates in browser picker
+  }
+
+  // Set default arrival time: current time + 20 minutes (respecting 15 min rule)
+  const arrivalDate = new Date(now.getTime() + 20 * 60 * 1000);
+  const arrHours = String(arrivalDate.getHours()).padStart(2, '0');
+  const arrMins = String(arrivalDate.getMinutes()).padStart(2, '0');
+  const arrTimeInput = document.getElementById("bookArrivalTime");
+  if (arrTimeInput) arrTimeInput.value = `${arrHours}:${arrMins}`;
+
+  // Set default departure time: arrival + 2 hours
+  const depDate = new Date(arrivalDate.getTime() + 120 * 60 * 1000);
+  const depHours = String(depDate.getHours()).padStart(2, '0');
+  const depMins = String(depDate.getMinutes()).padStart(2, '0');
+  const depTimeInput = document.getElementById("bookDepartureTime");
+  if (depTimeInput) depTimeInput.value = `${depHours}:${depMins}`;
+
+  // Reset error banner
+  hideBookingError();
+
+  // Setup live calculation event listeners
+  setupBookingFormLiveListeners();
+
+  // Perform initial calculation
+  calculateBookingTotals();
+
+  modal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeBookingModal() {
+  const modal = document.getElementById("bookingModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    document.body.style.overflow = "auto";
+  }
+}
+
+function showBookingError(message) {
+  const errBox = document.getElementById("bookingErrorAlert");
+  if (errBox) {
+    errBox.textContent = `⚠️ ${message}`;
+    errBox.classList.remove("hidden");
+    errBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  } else {
+    alert(message);
+  }
+}
+
+function hideBookingError() {
+  const errBox = document.getElementById("bookingErrorAlert");
+  if (errBox) {
+    errBox.textContent = "";
+    errBox.classList.add("hidden");
+  }
+}
+
+// Live calculation & summary updater
+function setupBookingFormLiveListeners() {
+  const fields = ["bookDate", "bookArrivalTime", "bookDepartureTime", "bookSlotsCount"];
+  fields.forEach(id => {
+    const elem = document.getElementById(id);
+    if (elem && !elem.dataset.listenerAttached) {
+      elem.addEventListener("input", calculateBookingTotals);
+      elem.addEventListener("change", calculateBookingTotals);
+      elem.dataset.listenerAttached = "true";
+    }
+  });
+}
+
+function calculateBookingTotals() {
+  hideBookingError();
+
+  const parkingLots = getParkingData();
+  const lot = parkingLots.find(p => p.id === activeBookingLotId);
+  if (!lot) return;
+
+  const dateVal = document.getElementById("bookDate") ? document.getElementById("bookDate").value : "";
+  const arrTimeVal = document.getElementById("bookArrivalTime") ? document.getElementById("bookArrivalTime").value : "";
+  const depTimeVal = document.getElementById("bookDepartureTime") ? document.getElementById("bookDepartureTime").value : "";
+  const slotsVal = document.getElementById("bookSlotsCount") ? parseInt(document.getElementById("bookSlotsCount").value, 10) : 1;
+  const hourlyRate = Number(lot.price || lot.twoWheelerPrice || 20);
+
+  // Update Summary texts
+  const sumParking = document.getElementById("sumParkingName");
+  const sumSlots = document.getElementById("sumSlotsCount");
+  const sumArr = document.getElementById("sumArrival");
+  const sumDep = document.getElementById("sumDeparture");
+  const sumDur = document.getElementById("sumDuration");
+  const sumRate = document.getElementById("sumHourlyRate");
+  const sumTotal = document.getElementById("sumTotalPrice");
+  const sumFormula = document.getElementById("sumCalcFormula");
+
+  if (sumParking) sumParking.textContent = lot.name;
+  if (sumSlots) sumSlots.textContent = `${slotsVal} Slot${slotsVal > 1 ? 's' : ''}`;
+  if (sumArr) sumArr.textContent = arrTimeVal ? `${dateVal} at ${arrTimeVal}` : "-";
+  if (sumDep) sumDep.textContent = depTimeVal ? `${dateVal} at ${depTimeVal}` : "-";
+  if (sumRate) sumRate.textContent = `₹${hourlyRate} / slot / hour`;
+
+  if (!arrTimeVal || !depTimeVal) {
+    if (sumDur) sumDur.textContent = "0 hours";
+    if (sumTotal) sumTotal.textContent = "₹0";
+    return;
+  }
+
+  const startMins = parseTimeToMinutes(arrTimeVal);
+  const endMins = parseTimeToMinutes(depTimeVal);
+
+  if (endMins <= startMins) {
+    if (sumDur) sumDur.textContent = "Invalid (Departure must be after arrival)";
+    if (sumTotal) sumTotal.textContent = "₹0";
+    return;
+  }
+
+  const durationMinutes = endMins - startMins;
+  const hours = Math.floor(durationMinutes / 60);
+  const minutes = durationMinutes % 60;
+
+  // Format Duration in hours and minutes as requested:
+  // Examples: "2 hours", "2 hours 30 minutes"
+  let durationText = "";
+  if (hours > 0 && minutes > 0) {
+    durationText = `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
+  } else if (hours > 0) {
+    durationText = `${hours} hour${hours > 1 ? 's' : ''}`;
+  } else {
+    durationText = `${minutes} minute${minutes > 1 ? 's' : ''}`;
+  }
+
+  if (sumDur) sumDur.textContent = durationText;
+
+  // Calculate Total Price:
+  // Total Price = Number of Slots × Parking Rate Per Hour × Parking Duration in Hours
+  // For partial hours, charge proportionally by the minute: (durationMinutes / 60)
+  const durationInHours = durationMinutes / 60;
+  const calculatedTotal = Math.round(slotsVal * hourlyRate * durationInHours);
+
+  if (sumTotal) sumTotal.textContent = `₹${calculatedTotal}`;
+  if (sumFormula) {
+    sumFormula.textContent = `Calculation: ${slotsVal} slot(s) × ₹${hourlyRate} × ${durationInHours.toFixed(2)} hrs = ₹${calculatedTotal}`;
+  }
+}
+
+// Master Validation for Booking Rules
+function validateBookingRules(lot, bookingData) {
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+
+  // Rule 8: Validate all fields before confirming a booking
+  if (!bookingData.userName) return "Please enter your full name.";
+  if (!bookingData.vehicleNumber) return "Please enter your vehicle registration number.";
+  if (!bookingData.bookingDate) return "Please select a booking date.";
+  if (!bookingData.arrivalTime) return "Please select an arrival time.";
+  if (!bookingData.departureTime) return "Please select a departure time.";
+
+  // Rule 7: Do not allow a booking when the parking location is closed
+  if ((lot.status || '').toUpperCase() === 'CLOSED') {
+    return "This parking location is currently closed. Bookings cannot be accepted.";
+  }
+
+  // Rule 1: Maximum 3 parking slots per booking
+  if (bookingData.numberOfSlots < 1 || bookingData.numberOfSlots > 3) {
+    return "You can book a maximum of 3 parking slots per booking.";
+  }
+
+  // Rule 3: Do not allow bookings for past dates
+  if (bookingData.bookingDate < todayStr) {
+    return "Bookings for past dates are not permitted. Please select today or a future date.";
+  }
+
+  // Arrival and departure minutes
+  const startMins = parseTimeToMinutes(bookingData.arrivalTime);
+  const endMins = parseTimeToMinutes(bookingData.departureTime);
+
+  // Parse exact arrival timestamp
+  const [arrH, arrM] = bookingData.arrivalTime.split(":").map(Number);
+  const [arrYear, arrMonth, arrDay] = bookingData.bookingDate.split("-").map(Number);
+  const selectedArrivalDate = new Date(arrYear, arrMonth - 1, arrDay, arrH, arrM, 0, 0);
+
+  // Rule 3: Do not allow bookings for past times on current day
+  if (selectedArrivalDate.getTime() < now.getTime()) {
+    return "Cannot book a parking slot for a past time.";
+  }
+
+  // Rule 2: Must book at least 15 minutes before the selected arrival time (from actual current date and time)
+  const diffMilliseconds = selectedArrivalDate.getTime() - now.getTime();
+  const diffMinutes = Math.floor(diffMilliseconds / (60 * 1000));
+
+  if (diffMinutes < 15) {
+    return "Please book at least 15 minutes before your arrival time.";
+  }
+
+  // Rule 4: The arrival time must be earlier than the departure time
+  if (endMins <= startMins) {
+    return "Arrival time must be earlier than departure time.";
+  }
+
+  // Rule 5: The booking must fit within the parking location's opening hours
+  const hoursRange = getParkingHoursRange(lot.timings);
+  if (!hoursRange.is24Hours) {
+    if (startMins < hoursRange.openMins || endMins > hoursRange.closeMins) {
+      return `Booking must fit within parking opening hours (${lot.timings || 'Operating hours'}).`;
+    }
+  }
+
+  // Rule 6 & Rule 8: The requested number of slots must not exceed available slots for that overlapping interval
+  const availableInInterval = calculateAvailableSlotsForInterval(
+    lot.id,
+    bookingData.bookingDate,
+    startMins,
+    endMins
+  );
+
+  if (bookingData.numberOfSlots > availableInInterval) {
+    return `Only ${availableInInterval} slot(s) available for the selected time window. Please reduce slots or adjust your time.`;
+  }
+
+  return null; // Valid!
+}
+
+// Generate unique sequential Booking ID (e.g. PSB-001)
+function generateNextBookingId() {
+  const bookings = getBookings();
+  let maxNum = 0;
+  bookings.forEach(b => {
+    if (b.bookingId && b.bookingId.startsWith("PSB-")) {
+      const num = parseInt(b.bookingId.replace("PSB-", ""), 10);
+      if (!isNaN(num) && num > maxNum) maxNum = num;
+    }
+  });
+  return `PSB-${String(maxNum + 1).padStart(3, "0")}`;
+}
+
+// Handle Form Submission & Confirm Booking
+function handleBookingFormSubmit(event) {
+  if (event) event.preventDefault();
+  hideBookingError();
+
+  const parkingLots = getParkingData();
+  const lot = parkingLots.find(p => p.id === activeBookingLotId);
+  if (!lot) {
+    showBookingError("Invalid parking location selected.");
+    return;
+  }
+
+  const userName = (document.getElementById("bookUserName").value || "").trim();
+  const vehicleNumber = (document.getElementById("bookVehicleNumber").value || "").trim().toUpperCase();
+  const bookingDate = document.getElementById("bookDate").value;
+  const arrivalTime = document.getElementById("bookArrivalTime").value;
+  const departureTime = document.getElementById("bookDepartureTime").value;
+  const numberOfSlots = parseInt(document.getElementById("bookSlotsCount").value, 10);
+  const hourlyRate = Number(lot.price || lot.twoWheelerPrice || 20);
+
+  const startMins = parseTimeToMinutes(arrivalTime);
+  const endMins = parseTimeToMinutes(departureTime);
+  const durationMinutes = Math.max(0, endMins - startMins);
+  const durationInHours = durationMinutes / 60;
+  const totalPrice = Math.round(numberOfSlots * hourlyRate * durationInHours);
+
+  const candidateBooking = {
+    userName,
+    vehicleNumber,
+    parkingId: lot.id,
+    parkingName: lot.name,
+    bookingDate,
+    arrivalTime,
+    departureTime,
+    numberOfSlots,
+    hourlyRate,
+    durationMinutes,
+    totalPrice
+  };
+
+  // Rule 1-9 Validation
+  const validationError = validateBookingRules(lot, candidateBooking);
+  if (validationError) {
+    showBookingError(validationError);
+    return;
+  }
+
+  // Create confirmed record
+  const bookingId = generateNextBookingId();
+  const newBooking = {
+    bookingId,
+    userName,
+    vehicleNumber,
+    parkingId: lot.id,
+    parkingName: lot.name,
+    bookingDate,
+    arrivalTime,
+    departureTime,
+    numberOfSlots,
+    hourlyRate,
+    durationMinutes,
+    totalPrice,
+    bookingStatus: "Confirmed",
+    createdAt: new Date().toISOString()
+  };
+
+  // 1. Save in LocalStorage ("parkingBookings")
+  const allBookings = getBookings();
+  allBookings.unshift(newBooking);
+  saveBookings(allBookings);
+
+  // 2. Close Form Modal
+  closeBookingModal();
+
+  // 3. Re-render Parking cards so updated availability is reflected
+  renderParkingCards();
+  updateMapPins();
+
+  // 4. Open Confirmation Receipt Modal
+  showBookingConfirmationModal(newBooking);
+}
+
+function showBookingConfirmationModal(booking) {
+  const modal = document.getElementById("bookingSuccessModal");
+  if (!modal) {
+    alert(`Parking booked successfully!\nBooking ID: ${booking.bookingId}`);
+    return;
+  }
+
+  const hours = Math.floor(booking.durationMinutes / 60);
+  const minutes = booking.durationMinutes % 60;
+  let durText = "";
+  if (hours > 0 && minutes > 0) durText = `${hours}h ${minutes}m`;
+  else if (hours > 0) durText = `${hours} hours`;
+  else durText = `${minutes} mins`;
+
+  document.getElementById("ticketBookingId").textContent = booking.bookingId;
+  document.getElementById("ticketLocation").textContent = booking.parkingName;
+  document.getElementById("ticketVehicle").textContent = booking.vehicleNumber;
+  document.getElementById("ticketSlots").textContent = `${booking.numberOfSlots} Slot(s)`;
+  document.getElementById("ticketDate").textContent = booking.bookingDate;
+  document.getElementById("ticketArrival").textContent = booking.arrivalTime;
+  document.getElementById("ticketDeparture").textContent = booking.departureTime;
+  document.getElementById("ticketDuration").textContent = durText;
+  document.getElementById("ticketPrice").textContent = `₹${booking.totalPrice}`;
+
+  modal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeBookingSuccessModal() {
+  const modal = document.getElementById("bookingSuccessModal");
+  if (modal) {
+    modal.classList.add("hidden");
+    document.body.style.overflow = "auto";
+  }
+}
+
+/* =========================================================
+   MY BOOKINGS PAGE LOGIC
+   - View citizen reservations
+   - Cancel future bookings with confirmation
+   - Release capacity upon cancellation
+   ========================================================= */
+function renderMyBookingsPage() {
+  const grid = document.getElementById("myBookingsGrid");
+  const countText = document.getElementById("bookingsCountText");
+  const noMsg = document.getElementById("noBookingsMsg");
+  if (!grid) return; // Not on my-bookings.html
+
+  const bookings = getBookings();
+
+  if (countText) {
+    countText.textContent = `Showing ${bookings.length} reservation${bookings.length === 1 ? '' : 's'}`;
+  }
+
+  if (bookings.length === 0) {
+    grid.innerHTML = "";
+    if (noMsg) noMsg.classList.remove("hidden");
+    return;
+  } else {
+    if (noMsg) noMsg.classList.add("hidden");
+  }
+
+  const now = new Date();
+
+  grid.innerHTML = bookings.map(b => {
+    // Check if booking has already finished
+    let isFinished = false;
+    try {
+      const [depH, depM] = b.departureTime.split(":").map(Number);
+      const [yr, mo, da] = b.bookingDate.split("-").map(Number);
+      const depDate = new Date(yr, mo - 1, da, depH, depM, 0, 0);
+      if (depDate.getTime() < now.getTime()) {
+        isFinished = true;
+      }
+    } catch (e) {}
+
+    const hours = Math.floor(b.durationMinutes / 60);
+    const mins = b.durationMinutes % 60;
+    const durStr = (hours > 0 ? `${hours}h ` : '') + (mins > 0 ? `${mins}m` : (hours === 0 ? '0m' : ''));
+
+    let badgeClass = "bcard-badge-confirmed";
+    let statusLabel = b.bookingStatus;
+
+    if (b.bookingStatus === "Cancelled") {
+      badgeClass = "bcard-badge-cancelled";
+    } else if (isFinished) {
+      badgeClass = "bcard-badge-completed";
+      statusLabel = "Completed";
+    }
+
+    const canCancel = (b.bookingStatus === "Confirmed") && !isFinished;
+
+    return `
+      <div class="booking-card" id="bcard-${b.bookingId}">
+        <div>
+          <div class="bcard-header">
+            <span class="bcard-id">${b.bookingId}</span>
+            <span class="bcard-badge ${badgeClass}">${statusLabel}</span>
+          </div>
+
+          <h3 class="bcard-location">📍 ${b.parkingName}</h3>
+
+          <div class="bcard-details-list">
+            <div class="bcard-detail-row">
+              <span class="b-label">Vehicle Registration:</span>
+              <span class="b-val font-mono">${b.vehicleNumber}</span>
+            </div>
+            <div class="bcard-detail-row">
+              <span class="b-label">Date:</span>
+              <span class="b-val">${b.bookingDate}</span>
+            </div>
+            <div class="bcard-detail-row">
+              <span class="b-label">Time Window:</span>
+              <span class="b-val">${b.arrivalTime} - ${b.departureTime}</span>
+            </div>
+            <div class="bcard-detail-row">
+              <span class="b-label">Reserved Slots:</span>
+              <span class="b-val font-bold">${b.numberOfSlots} Slot(s)</span>
+            </div>
+            <div class="bcard-detail-row">
+              <span class="b-label">Duration:</span>
+              <span class="b-val">${durStr}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bcard-footer">
+          <div>
+            <span style="font-size:0.75rem; color:#64748b; display:block;">Total Paid:</span>
+            <span class="bcard-price">₹${b.totalPrice}</span>
+          </div>
+
+          ${canCancel ? `
+            <button class="btn-cancel-booking" onclick="cancelBooking('${b.bookingId}')">
+              Cancel Booking
+            </button>
+          ` : `
+            <span style="font-size:0.8rem; color:#94a3b8; font-style:italic;">
+              ${b.bookingStatus === 'Cancelled' ? 'Cancelled' : 'Trip Finished'}
+            </span>
+          `}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function cancelBooking(bookingId) {
+  const bookings = getBookings();
+  const booking = bookings.find(b => b.bookingId === bookingId);
+  if (!booking) return;
+
+  // Check if trip already finished
+  const now = new Date();
+  try {
+    const [depH, depM] = booking.departureTime.split(":").map(Number);
+    const [yr, mo, da] = booking.bookingDate.split("-").map(Number);
+    const depDate = new Date(yr, mo - 1, da, depH, depM, 0, 0);
+    if (depDate.getTime() < now.getTime()) {
+      alert("This booking has already finished and cannot be cancelled.");
+      return;
+    }
+  } catch (e) {}
+
+  const confirmed = confirm(`Are you sure you want to cancel booking ${bookingId} for ${booking.parkingName}?\nThis will release ${booking.numberOfSlots} reserved slot(s).`);
+  if (!confirmed) return;
+
+  // Update status to Cancelled
+  booking.bookingStatus = "Cancelled";
+  saveBookings(bookings);
+
+  // Release capacity & update display
+  renderMyBookingsPage();
+  renderParkingCards();
+  updateMapPins();
+
+  alert(`Booking ${bookingId} has been successfully cancelled and parking capacity released.`);
+}
+
 
 function focusParkingCard(lotId) {
   currentParkingFilter = "all";
@@ -2461,6 +3097,12 @@ window.addEventListener("click", (e) => {
 
   const reportModal = document.getElementById("reportDetailsModal");
   if (e.target === reportModal) closeReportModal();
+
+  const bookingModal = document.getElementById("bookingModal");
+  if (e.target === bookingModal) closeBookingModal();
+
+  const bookingSuccessModal = document.getElementById("bookingSuccessModal");
+  if (e.target === bookingSuccessModal) closeBookingSuccessModal();
 });
 
 window.addEventListener("keydown", (e) => {
@@ -2468,6 +3110,8 @@ window.addEventListener("keydown", (e) => {
     closeModal();
     closeSuccessModal();
     closeReportModal();
+    closeBookingModal();
+    closeBookingSuccessModal();
   }
 });
 
@@ -2479,6 +3123,7 @@ function injectBottomNavigation() {
   const currentPath = window.location.pathname;
   const isHome = currentPath.endsWith("index.html") || currentPath.endsWith("/") || currentPath === "";
   const isParking = currentPath.endsWith("find-parking.html");
+  const isBookings = currentPath.endsWith("my-bookings.html");
   const isReport = currentPath.endsWith("report.html");
   const isMyReports = currentPath.endsWith("my-reports.html");
 
@@ -2496,13 +3141,17 @@ function injectBottomNavigation() {
       <span class="bnav-icon">🅿️</span>
       <span>Parking</span>
     </a>
+    <a href="my-bookings.html" class="bottom-nav-item ${isBookings ? 'active' : ''}">
+      <span class="bnav-icon">🎫</span>
+      <span>Bookings</span>
+    </a>
     <a href="report.html" class="bottom-nav-item bnav-report ${isReport ? 'active' : ''}" aria-label="Report Problem">
       <span class="bnav-icon">🚨</span>
       <span>Report</span>
     </a>
     <a href="my-reports.html" class="bottom-nav-item ${isMyReports ? 'active' : ''}">
       <span class="bnav-icon">📋</span>
-      <span>My Reports</span>
+      <span>Reports</span>
     </a>
   `;
 
@@ -2668,6 +3317,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderTrafficMonitoringPage();
   renderAdminDashboard();
   renderProfilePage();
-  console.log("Smartpark Puducherry - Ready with Hourly Parking Sync Engine. Role:", getCurrentUserRole());
+  renderMyBookingsPage();
+  console.log("Smartpark Puducherry - Ready with Hourly Parking Sync & Booking Engine. Role:", getCurrentUserRole());
 });
 
