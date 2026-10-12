@@ -106,12 +106,22 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
 }
 
+.brand-shield img,
+.brand-shield svg,
 .police-emblem {
-  width: 36px;
-  height: 40px;
+  width: 38px;
+  height: 44px;
+  display: block;
+  object-fit: contain;
+}
+
+.footer-shield img,
+.footer-shield svg {
+  width: 44px;
+  height: 52px;
 }
 
 .brand-titles {
@@ -2128,15 +2138,65 @@ body {
 
 /* HERO, STEPS, STATS & FOOTER */
 .hero-section {
-  background-color: var(--color-dark-navy);
+  background: radial-gradient(circle at 50% 25%, #13243d 0%, var(--color-dark-navy) 70%, #060e18 100%);
   color: var(--color-white);
-  padding: 85px 0 95px 0;
+  padding: 60px 0 90px 0;
   text-align: center;
   position: relative;
   overflow: hidden;
   border-bottom: 3px solid var(--color-yellow);
 }
 .hero-content { position: relative; z-index: 2; }
+
+/* Background Watermark Crest similar to reference screenshot */
+.hero-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -52%);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.12;
+  filter: drop-shadow(0 0 40px rgba(255, 178, 0, 0.2));
+  width: 520px;
+  max-width: 90vw;
+}
+
+.hero-watermark-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Foreground Official Police Crest */
+.hero-logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.hero-police-crest {
+  width: 108px;
+  height: 126px;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 8px rgba(245, 179, 0, 0.35));
+  transition: transform 0.3s ease;
+}
+
+.hero-police-crest:hover {
+  transform: scale(1.04);
+}
+
+.hero-subheading {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--color-yellow);
+  letter-spacing: 2px;
+  margin-top: -8px;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
 .hero-badge {
   display: inline-block;
   background-color: rgba(245, 197, 66, 0.15);
