@@ -434,15 +434,18 @@ function renderProfilePage() {
     if (role === "police") {
       profileRoleBadge.textContent = "Police Officer";
       profileRoleBadge.style.backgroundColor = "#d97706";
-      if (avatarDisplay) avatarDisplay.textContent = "👮‍♂️";
+      profileRoleBadge.style.color = "#ffffff";
+      if (avatarDisplay) avatarDisplay.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
     } else if (role === "admin") {
       profileRoleBadge.textContent = "System Admin";
       profileRoleBadge.style.backgroundColor = "#dc2626";
-      if (avatarDisplay) avatarDisplay.textContent = "⚙️";
+      profileRoleBadge.style.color = "#ffffff";
+      if (avatarDisplay) avatarDisplay.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`;
     } else {
       profileRoleBadge.textContent = "Citizen";
       profileRoleBadge.style.backgroundColor = "#0066cc";
-      if (avatarDisplay) avatarDisplay.textContent = "👤";
+      profileRoleBadge.style.color = "#ffffff";
+      if (avatarDisplay) avatarDisplay.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0066cc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
     }
   }
 
@@ -757,11 +760,12 @@ function syncNavbarLoginStatus() {
 
   if (role) {
     if (loginLink) {
-      loginLink.textContent = "👤 My Profile";
+      loginLink.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Profile`;
       loginLink.href = "profile.html";
     }
     if (navLogoutBtn) {
       navLogoutBtn.style.display = "inline-flex";
+      navLogoutBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; vertical-align:middle;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Logout`;
     }
   } else {
     if (loginLink) {
