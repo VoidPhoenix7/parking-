@@ -20,14 +20,7 @@
     <div class="nav-container">
       <a href="index.html" class="brand">
         <!-- Indian Police & Traffic Enforcement Emblem Badge -->
-        <div class="brand-shield">
-          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
-            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
-            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
-            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <div class="brand-shield"><img src="puducherry-police-logo.svg" alt="Puducherry Police Emblem" class="police-emblem" /></div>
         <div class="brand-titles">
           <span class="brand-name">Smartpark Puducherry</span>
           <span class="brand-tag">TRAFFIC ENFORCEMENT & CITIZEN PORTAL</span>
@@ -56,9 +49,9 @@
   <!-- 2. PAGE HEADER -->
   <section class="page-header">
     <div class="container text-center">
-      <span class="page-badge">Real-time Spot Finder</span>
+      <span class="page-badge">Smart City Spot Finder</span>
       <h1 class="page-title">Find Parking Spaces</h1>
-      <p class="page-subtitle">Check real-time parking space availability across Puducherry city</p>
+      <p class="page-subtitle">Check parking space availability across Puducherry city</p>
     </div>
   </section>
 
@@ -69,14 +62,14 @@
     <div class="controls-card">
       <!-- Search Input -->
       <div class="search-box-wrapper">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">ðŸ”</span>
         <input 
           type="text" 
           id="searchInput" 
           placeholder="Search parking location (e.g. White Town, MG Road)..." 
           autocomplete="off"
         />
-        <button id="clearSearchBtn" class="clear-btn" title="Clear search">✕</button>
+        <button id="clearSearchBtn" class="clear-btn" title="Clear search">âœ•</button>
       </div>
 
       <!-- Filter Buttons -->
@@ -99,16 +92,13 @@
     <div class="map-section-wrapper">
       <div class="map-header">
         <div>
-          <h3 class="map-title">📍 Puducherry City Interactive Parking Map</h3>
-          <p class="map-subtitle">Powered by Leaflet & OpenStreetMap — Click any marker for demo slots and direct reservation</p>
+          <h3 class="map-title">ðŸ“ Puducherry City Interactive Parking Map</h3>
+          <p class="map-subtitle">Powered by Leaflet & OpenStreetMap â€” Click any marker for slot availability and reservation</p>
         </div>
         <div class="map-legend">
-          <span class="legend-item"><span class="marker-dot marker-green"></span> Lots Available</span>
-          <span class="legend-item"><span class="marker-dot marker-yellow"></span> Limited (≤10)</span>
+          <span class="legend-item"><span class="marker-dot marker-green"></span> Available</span>
+          <span class="legend-item"><span class="marker-dot marker-yellow"></span> Limited (â‰¤10)</span>
           <span class="legend-item"><span class="marker-dot marker-red"></span> Full (0)</span>
-          <span class="legend-item legend-divider"></span>
-          <span class="legend-item"><span class="badge-legend-rt">🟢 Real-Time (3)</span></span>
-          <span class="legend-item"><span class="badge-legend-demo">🏷️ Demo Sample (3)</span></span>
         </div>
       </div>
 
@@ -136,7 +126,7 @@
 
     <!-- Empty state message if search finds nothing -->
     <div id="noResultsMsg" class="no-results hidden">
-      <div class="no-results-icon">🔎</div>
+      <div class="no-results-icon">ðŸ”Ž</div>
       <h3>No Parking Locations Found</h3>
       <p>Try searching for a different area like "White Town" or change your filter.</p>
     </div>
@@ -151,14 +141,14 @@
           <span class="modal-badge">Parking Location Details</span>
           <h3 id="modalName">Parking Details</h3>
         </div>
-        <button class="modal-close" onclick="closeModal()" aria-label="Close dialog">✕</button>
+        <button class="modal-close" onclick="closeModal()" aria-label="Close dialog">âœ•</button>
       </div>
       <div class="modal-body" id="modalBody">
         <!-- Content inserted dynamically with proper address and two/four-wheeler rates -->
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary btn-modal-done" onclick="closeModal()">
-          ✓ Got it
+          âœ“ Got it
         </button>
       </div>
     </div>
@@ -172,7 +162,7 @@
           <span class="modal-badge">Instant Reservation</span>
           <h3 id="bookingModalTitle">Book a Parking Slot</h3>
         </div>
-        <button class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">✕</button>
+        <button class="modal-close" onclick="closeBookingModal()" aria-label="Close dialog">âœ•</button>
       </div>
 
       <form id="bookingForm" onsubmit="handleBookingFormSubmit(event)">
@@ -186,11 +176,11 @@
               <h4 id="bookParkingName">White Town Parking</h4>
               <span class="bloc-badge" id="bookParkingStatus">OPEN</span>
             </div>
-            <p class="bloc-address" id="bookParkingAddress">📍 Location address</p>
+            <p class="bloc-address" id="bookParkingAddress">ðŸ“ Location address</p>
             <div class="bloc-meta">
-              <span>🕒 <strong>Hours:</strong> <span id="bookParkingTimings">06:00 AM - 11:00 PM</span></span>
-              <span>🅿️ <strong>Available Right Now:</strong> <span id="bookParkingCurrentAvail" class="color-green">0</span></span>
-              <span>💰 <strong>Hourly Rate:</strong> ₹<span id="bookParkingHourlyRate">20</span>/hr</span>
+              <span>ðŸ•’ <strong>Hours:</strong> <span id="bookParkingTimings">06:00 AM - 11:00 PM</span></span>
+              <span>ðŸ…¿ï¸ <strong>Available Right Now:</strong> <span id="bookParkingCurrentAvail" class="color-green">0</span></span>
+              <span>ðŸ’° <strong>Hourly Rate:</strong> â‚¹<span id="bookParkingHourlyRate">20</span>/hr</span>
             </div>
           </div>
 
@@ -231,7 +221,7 @@
               <div class="time-picker-wrapper">
                 <input type="text" id="bookArrivalTime" class="form-control time-text-input" placeholder="e.g. 23:00 or 11:00 PM" autocomplete="off" required />
                 <div class="clock-symbol-wrapper" title="Click clock symbol to select time" onclick="triggerClockPicker('bookArrivalTime', 'bookArrivalTimePicker')">
-                  <span class="clock-symbol-icon">🕒</span>
+                  <span class="clock-symbol-icon">ðŸ•’</span>
                   <input type="time" id="bookArrivalTimePicker" class="native-clock-overlay" tabindex="-1" />
                 </div>
               </div>
@@ -243,7 +233,7 @@
               <div class="time-picker-wrapper">
                 <input type="text" id="bookDepartureTime" class="form-control time-text-input" placeholder="e.g. 01:30 or 01:30 AM" autocomplete="off" required />
                 <div class="clock-symbol-wrapper" title="Click clock symbol to select time" onclick="triggerClockPicker('bookDepartureTime', 'bookDepartureTimePicker')">
-                  <span class="clock-symbol-icon">🕒</span>
+                  <span class="clock-symbol-icon">ðŸ•’</span>
                   <input type="time" id="bookDepartureTimePicker" class="native-clock-overlay" tabindex="-1" />
                 </div>
               </div>
@@ -252,7 +242,7 @@
 
           <!-- Real-Time Booking Summary & Live Calculation -->
           <div class="booking-summary-card">
-            <h4 class="summary-heading">💳 Booking Summary & Pricing</h4>
+            <h4 class="summary-heading">ðŸ’³ Booking Summary & Pricing</h4>
             <div class="summary-row">
               <span class="summary-label">Selected Parking:</span>
               <span class="summary-value" id="sumParkingName">-</span>
@@ -275,15 +265,15 @@
             </div>
             <div class="summary-row">
               <span class="summary-label">Rate per Slot:</span>
-              <span class="summary-value" id="sumHourlyRate">₹20 / hour</span>
+              <span class="summary-value" id="sumHourlyRate">â‚¹20 / hour</span>
             </div>
             <div class="summary-divider"></div>
             <div class="summary-row total-row">
               <span class="summary-total-label">Total Amount Payable:</span>
-              <span class="summary-total-value" id="sumTotalPrice">₹0</span>
+              <span class="summary-total-value" id="sumTotalPrice">â‚¹0</span>
             </div>
             <div class="summary-calculation-note" id="sumCalcFormula">
-              Formula: Slots × Hourly Rate × Duration
+              Formula: Slots Ã— Hourly Rate Ã— Duration
             </div>
           </div>
         </div>
@@ -291,7 +281,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-outline" onclick="closeBookingModal()">Cancel</button>
           <button type="submit" class="btn btn-primary" id="btnConfirmBooking">
-            ✓ Confirm Booking
+            âœ“ Confirm Booking
           </button>
         </div>
       </form>
@@ -301,7 +291,7 @@
   <!-- 6C. BOOKING CONFIRMATION SUCCESS MODAL -->
   <div class="modal-overlay hidden" id="bookingSuccessModal">
     <div class="modal-box">
-      <div class="success-icon-badge">🎉</div>
+      <div class="success-icon-badge">ðŸŽ‰</div>
       <div class="modal-header text-center" style="border-bottom:none; padding-bottom: 0;">
         <h3 style="color:#0f172a; margin: 0 auto; font-size:1.4rem;">Parking booked successfully!</h3>
         <p style="color:#64748b; font-size:0.88rem; margin-top:4px;">Your reservation is confirmed in Puducherry Smart Grid</p>
@@ -350,7 +340,7 @@
           </div>
           
           <div class="ticket-buffer-note" id="ticketBufferNotice" style="margin-top: 14px; padding: 10px 14px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; font-size: 0.85rem; color: #065f46; display: flex; align-items: center; gap: 8px;">
-            <span>🛡️</span>
+            <span>ðŸ›¡ï¸</span>
             <span><strong>Slot Secured:</strong> Slot is reserved starting 15 minutes prior to your arrival time (<span id="ticketBufferTime">--:--</span>) to ensure instant access.</span>
           </div>
         </div>
@@ -358,7 +348,7 @@
 
       <div class="modal-footer" style="flex-wrap: wrap; justify-content: center; gap: 10px;">
         <a href="my-bookings.html" class="btn btn-primary" style="flex: 1; min-width: 160px; text-align: center;">
-          📋 View in My Bookings
+          ðŸ“‹ View in My Bookings
         </a>
         <button type="button" class="btn btn-outline" onclick="closeBookingSuccessModal()" style="flex: 1; min-width: 140px;">
           Close
@@ -371,14 +361,7 @@
   <footer class="footer">
     <div class="container footer-content">
       <div class="footer-brand">
-        <div class="brand-shield footer-shield">
-          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
-            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
-            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
-            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <div class="brand-shield footer-shield"><img src="puducherry-police-logo.svg" alt="Puducherry Police Emblem" class="police-emblem" /></div>
         <span class="footer-title">Smartpark Puducherry</span>
       </div>
       <p class="footer-text">
@@ -393,3 +376,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
