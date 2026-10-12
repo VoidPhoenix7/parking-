@@ -3632,41 +3632,11 @@ function startHourlyParkingTimer() {
 }
 
 
-function injectSmartCityLiveTicker() {
-  // Inject a sleek futuristic status bar at the very top of each page
-  if (document.getElementById("smartCityLiveBanner")) return;
-
-  const banner = document.createElement("div");
-  banner.id = "smartCityLiveBanner";
-  banner.className = "smart-city-ticker-bar";
-  banner.innerHTML = `
-    <div class="ticker-content">
-      <div class="ticker-badge">
-        <span class="live-dot" id="liveIoTPulse"></span>
-        <span class="ticker-title">PUDUCHERRY SMART SENSOR GRID</span>
-      </div>
-      <div class="ticker-stream" id="tickerText">
-        <span>📡 <strong>IoT Telemetry:</strong> 120+ ultrasonic sensors active in White Town & MG Road</span>
-        <span class="ticker-sep">•</span>
-        <span>🤖 <strong>AI Flow:</strong> Predictive parking routing active</span>
-        <span class="ticker-sep">•</span>
-        <span>⏱️ <strong>Update Rate:</strong> Hourly dynamic sync</span>
-      </div>
-      <div class="ticker-actions">
-        <span class="tech-tag">PROTOTYPE 2.0</span>
-      </div>
-    </div>
-  `;
-
-  document.body.insertBefore(banner, document.body.firstChild);
-}
-
 // Document Ready Initialization
 document.addEventListener("DOMContentLoaded", () => {
   initLocalStorage();
   initUserProfile();
   setupNavbar();
-  injectSmartCityLiveTicker();
   startHourlyParkingTimer();
   injectBottomNavigation();
   syncNavbarLoginStatus();
