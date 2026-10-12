@@ -2303,11 +2303,6 @@ function renderParkingCards() {
         <div class="card-content">
           <div class="card-header-row">
             <div>
-              <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-                <span class="badge-tag ${lot.isDemo ? 'badge-tag-demo' : 'badge-tag-rt'}">
-                  ${lot.isDemo ? '🏷️ Demo Sample' : '🟢 Real-Time Sensor'}
-                </span>
-              </div>
               <h3 class="card-title">${lot.name}</h3>
             </div>
             <span class="status-badge ${isClosed ? 'badge-closed' : 'badge-open'}">
@@ -2438,27 +2433,23 @@ function updateLeafletMapMarkers() {
 
     const isClosed = (lot.status || "").toUpperCase() === "CLOSED";
 
-    // Custom Leaflet DivIcon with real-time available slot number
+    // Custom Leaflet DivIcon with available slot number
     const customIcon = L.divIcon({
       className: "leaflet-custom-marker",
       html: `
         <div class="custom-marker-pin marker-${markerColor}" title="${lot.name} (${lot.availableSpaces} slots)">
           <span>${lot.availableSpaces}</span>
         </div>
-        <div class="custom-marker-label">${lot.isDemo ? '🏷️ Demo' : '🟢 Live'}</div>
       `,
-      iconSize: [36, 48],
-      iconAnchor: [18, 42],
-      popupAnchor: [0, -38]
+      iconSize: [36, 42],
+      iconAnchor: [18, 38],
+      popupAnchor: [0, -36]
     });
 
     const popupHtml = `
       <div class="leaflet-popup-parking">
         <div class="lpop-header">
           <div class="lpop-title">${lot.name}</div>
-          <span class="badge-tag ${lot.isDemo ? 'badge-tag-demo' : 'badge-tag-rt'}">
-            ${lot.isDemo ? '🏷️ Demo Sample' : '🟢 Real-Time'}
-          </span>
         </div>
         <p class="lpop-location">📍 ${lot.location}</p>
         
