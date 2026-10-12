@@ -1821,68 +1821,237 @@ body {
 .marker-yellow { background-color: var(--color-yellow); }
 .marker-red { background-color: var(--color-red); }
 
-.fake-map {
+/* LEAFLET OPENSTREETMAP CONTAINER */
+.leaflet-parking-map {
   position: relative;
-  height: 380px;
-  background-color: #f1f5f9;
-  border-radius: var(--radius-sm);
+  width: 100%;
+  height: 460px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid #cbd5e1;
+  box-shadow: var(--shadow-sm);
+  z-index: 1;
   overflow: hidden;
-  border: 2px solid #cbd5e1;
-  background-image: 
-    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-  background-size: 32px 32px;
+  background-color: #f8fafc;
 }
 
-.map-sea {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 22%;
-  height: 100%;
-  background: linear-gradient(90deg, #93c5fd 0%, #60a5fa 100%);
+@media (max-width: 768px) {
+  .leaflet-parking-map {
+    height: 360px;
+  }
+}
+
+.legend-divider {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  background: #cbd5e1;
+  margin: 0 4px;
+}
+
+.badge-legend-rt {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+}
+
+.badge-legend-demo {
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #fde68a;
+}
+
+/* Custom Marker Pins for Leaflet */
+.leaflet-custom-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.custom-marker-pin {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-left: 3px dashed #3b82f6;
-}
-
-.sea-label {
-  color: #1e3a8a;
-  font-size: 0.9rem;
   font-weight: 800;
-  transform: rotate(-90deg);
-  white-space: nowrap;
-  letter-spacing: 1.5px;
+  font-size: 0.86rem;
+  box-shadow: 0 4px 12px rgba(11, 25, 44, 0.35);
+  border: 2.5px solid #ffffff;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.road {
-  position: absolute;
-  background: #cbd5e1;
-  color: #475569;
+.custom-marker-pin:hover {
+  transform: scale(1.18) translateY(-2px);
+}
+
+.custom-marker-pin.marker-green {
+  background-color: var(--color-green);
+}
+
+.custom-marker-pin.marker-yellow {
+  background-color: var(--color-yellow);
+  color: #0b192c;
+}
+
+.custom-marker-pin.marker-red {
+  background-color: var(--color-red);
+}
+
+.custom-marker-label {
+  margin-top: 3px;
+  background: rgba(11, 25, 44, 0.94);
+  color: #ffffff;
   font-size: 0.72rem;
   font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
 }
 
-.road-h-1 { right: 22%; top: 0; bottom: 0; width: 24px; writing-mode: vertical-rl; border-right: 1px dashed white; border-left: 1px dashed white; }
-.road-h-2 { left: 0; right: 25%; top: 45%; height: 20px; border-top: 1px dashed white; border-bottom: 1px dashed white; }
-.road-v-1 { left: 35%; top: 0; bottom: 0; width: 20px; writing-mode: vertical-rl; border-right: 1px dashed white; border-left: 1px dashed white; }
-.road-v-2 { left: 55%; top: 0; bottom: 0; width: 20px; writing-mode: vertical-rl; border-right: 1px dashed white; border-left: 1px dashed white; }
+/* Leaflet Popup Dialog Styling */
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-md) !important;
+  box-shadow: 0 12px 30px rgba(11, 25, 44, 0.22) !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
 
-.map-pin { position: absolute; cursor: pointer; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s ease; z-index: 10; }
-.map-pin:hover { transform: scale(1.15) translateY(-4px); z-index: 20; }
-.pin-badge { color: var(--color-white); font-weight: 800; font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25); border: 2px solid white; }
-.pin-label { background: var(--color-dark-blue); color: var(--color-white); font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 4px; margin-top: 4px; white-space: nowrap; }
+.leaflet-popup-content {
+  margin: 0 !important;
+  line-height: 1.4 !important;
+  min-width: 270px;
+  max-width: 310px;
+}
 
-.pin-1 { top: 60%; right: 26%; }
-.pin-2 { top: 52%; left: 42%; }
-.pin-3 { top: 38%; left: 16%; }
-.pin-4 { top: 22%; left: 40%; }
-.pin-5 { top: 12%; right: 28%; }
-.pin-6 { top: 15%; left: 10%; }
+.leaflet-popup-parking {
+  padding: 16px 18px;
+}
+
+.lpop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  gap: 8px;
+}
+
+.lpop-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.lpop-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 3px;
+}
+
+.lpop-badge.badge-realtime {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.lpop-badge.badge-demo {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.lpop-address {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 12px;
+  line-height: 1.35;
+}
+
+.lpop-stats {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lpop-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.lpop-stat-label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.lpop-stat-val {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.lpop-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.lpop-actions .btn {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  border-radius: var(--radius-sm);
+}
+
+/* Badges for Parking Grid Cards */
+.badge-tag-rt {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid #bbf7d0;
+  letter-spacing: 0.2px;
+}
+
+.badge-tag-demo {
+  background: #fef3c7;
+  color: #b45309;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid #fde68a;
+  letter-spacing: 0.2px;
+}
 
 /* PARKING CARDS GRID */
 .parking-results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
