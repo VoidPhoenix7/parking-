@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -16,14 +16,7 @@
   <header class="navbar">
     <div class="nav-container">
       <a href="index.html" class="brand">
-        <div class="brand-shield">
-          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
-            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
-            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
-            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <div class="brand-shield"><img src="puducherry-police-logo.svg" alt="Puducherry Police Emblem" class="police-emblem" /></div>
         <div class="brand-titles">
           <span class="brand-name">Smartpark Puducherry</span>
           <span class="brand-tag">TRAFFIC ENFORCEMENT & CITIZEN PORTAL</span>
@@ -44,7 +37,7 @@
         <a href="report.html" class="nav-link">Report</a>
         <a href="my-reports.html" class="nav-link">My Reports</a>
         <a href="profile.html" class="nav-link active">Profile</a>
-        <button type="button" class="btn-logout" onclick="logoutUser()">🚪 Logout</button>
+        <button type="button" class="btn-logout" onclick="logoutUser()">ðŸšª Logout</button>
       </nav>
     </div>
   </header>
@@ -63,7 +56,7 @@
     <!-- Login Required Prompt (Shown when logged out) -->
     <div id="profileAuthPrompt" class="profile-auth-prompt hidden">
       <div class="auth-prompt-card">
-        <div class="auth-prompt-icon">🔒</div>
+        <div class="auth-prompt-icon">ðŸ”’</div>
         <h2>Please Login to Access Profile</h2>
         <p>You must be logged in to view and edit your profile details.</p>
         <a href="login.html" class="btn btn-primary" style="margin-top: 16px; padding: 12px 28px;">
@@ -77,7 +70,7 @@
       <!-- LEFT: PROFILE CARD -->
       <div class="profile-card-summary">
         <div class="profile-avatar-wrap">
-          <div class="profile-avatar" id="avatarDisplay">👤</div>
+          <div class="profile-avatar" id="avatarDisplay">ðŸ‘¤</div>
           <span class="profile-role-pill" id="profileRoleBadge">Citizen</span>
         </div>
 
@@ -86,15 +79,15 @@
 
         <div class="profile-meta-list">
           <div class="profile-meta-item">
-            <span class="meta-label">📅 Date of Birth:</span>
+            <span class="meta-label">ðŸ“… Date of Birth:</span>
             <span class="meta-value" id="profileDobDisplay">Not specified</span>
           </div>
           <div class="profile-meta-item">
-            <span class="meta-label">📍 City:</span>
+            <span class="meta-label">ðŸ“ City:</span>
             <span class="meta-value">Puducherry (UT)</span>
           </div>
           <div class="profile-meta-item">
-            <span class="meta-label">🛡️ Verification:</span>
+            <span class="meta-label">ðŸ›¡ï¸ Verification:</span>
             <span class="meta-value" style="color: #10B981; font-weight: 700;">Verified Citizen</span>
           </div>
         </div>
@@ -175,7 +168,7 @@
 
           <!-- Notification Banner -->
           <div id="saveSuccessAlert" class="save-success-alert hidden">
-            ✓ Profile details successfully updated!
+            âœ“ Profile details successfully updated!
           </div>
         </form>
       </div>
@@ -187,14 +180,7 @@
   <footer class="footer">
     <div class="container footer-content">
       <div class="footer-brand">
-        <div class="brand-shield footer-shield">
-          <svg class="police-emblem" viewBox="0 0 36 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 2L3 7.5V18C3 27.5 9.5 35.8 18 38.5C26.5 35.8 33 27.5 33 18V7.5L18 2Z" fill="#0066CC" stroke="#FFB200" stroke-width="2"/>
-            <circle cx="18" cy="18" r="9" fill="#0B192C" stroke="#FFB200" stroke-width="1.5"/>
-            <path d="M15 13H19C20.65 13 22 14.35 22 16C22 17.65 20.65 19 19 19H15V13Z" fill="#FFB200"/>
-            <path d="M15 13V23" stroke="#FFB200" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </div>
+        <div class="brand-shield footer-shield"><img src="puducherry-police-logo.svg" alt="Puducherry Police Emblem" class="police-emblem" /></div>
         <span class="footer-title">Smartpark Puducherry</span>
       </div>
       <p class="footer-text">
@@ -209,3 +195,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+
