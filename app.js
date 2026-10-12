@@ -1858,8 +1858,8 @@ function openReportDetailsModal(reportId) {
       </div>
     `}
 
-    <!-- POLICE STATUS ACTION BUTTONS (Only when viewed by Police or Admin) -->
-    ${(getCurrentUserRole() === 'police' || getCurrentUserRole() === 'admin') ? `
+    <!-- POLICE STATUS ACTION BUTTONS (Strictly for Police Dashboard / Admin Dashboard only - Never on citizen pages) -->
+    ${(!window.location.pathname.includes("my-reports.html") && !window.location.pathname.includes("report.html") && (getCurrentUserRole() === 'police' || getCurrentUserRole() === 'admin')) ? `
       <div class="police-modal-actions-box">
         <span style="font-size: 0.82rem; font-weight: 800; color: #0b192c; text-transform: uppercase; display: block; margin-bottom: 8px;">
           Police Action / Update Status:
@@ -2448,14 +2448,18 @@ function getParkingHoursRange(timingsStr) {
 }
 
 // Calculate available slots for a specific parking lot during a specific time interval
+// Reserving slots 15 minutes prior to the booking arrival time
 function calculateAvailableSlotsForInterval(lotId, targetDateStr, startMins, endMins) {
   const parkingLots = getParkingData();
   const lot = parkingLots.find(p => p.id === lotId);
   if (!lot) return 0;
 
   // Capacity baseline
-  const totalCapacity = lot.totalSpaces;
   const currentBaselineAvailable = lot.availableSpaces;
+
+  // Reserve slot 15 minutes prior to the requested booking arrival time
+  const reqStart = Math.max(0, startMins - 15);
+  const reqEnd = endMins;
 
   // Find confirmed bookings for this lot on the target date that overlap with the interval
   const allBookings = getBookings();
@@ -2464,11 +2468,13 @@ function calculateAvailableSlotsForInterval(lotId, targetDateStr, startMins, end
     if (b.bookingStatus !== 'Confirmed') return false;
     if (b.bookingDate !== targetDateStr) return false;
 
-    const bStart = parseTimeToMinutes(b.arrivalTime);
+    const bArrivalMins = parseTimeToMinutes(b.arrivalTime);
+    // Booking slot is reserved 15 minutes prior to arrival time
+    const bStart = Math.max(0, bArrivalMins - 15);
     const bEnd = parseTimeToMinutes(b.departureTime);
 
     // Overlap condition: intervals overlap if max(start1, start2) < min(end1, end2)
-    return Math.max(startMins, bStart) < Math.min(endMins, bEnd);
+    return Math.max(reqStart, bStart) < Math.min(reqEnd, bEnd);
   });
 
   const reservedSlots = overlappingBookings.reduce((sum, b) => sum + (Number(b.numberOfSlots) || 1), 0);
@@ -2520,19 +2526,12 @@ function openBookingModal(lotId) {
     dateInput.min = todayStr; // Prevent picking past dates in browser picker
   }
 
-  // Set default arrival time: current time + 20 minutes (respecting 15 min rule)
-  const arrivalDate = new Date(now.getTime() + 20 * 60 * 1000);
-  const arrHours = String(arrivalDate.getHours()).padStart(2, '0');
-  const arrMins = String(arrivalDate.getMinutes()).padStart(2, '0');
+  // Expected arrival and departure time must be selected manually by user
   const arrTimeInput = document.getElementById("bookArrivalTime");
-  if (arrTimeInput) arrTimeInput.value = `${arrHours}:${arrMins}`;
+  if (arrTimeInput) arrTimeInput.value = "";
 
-  // Set default departure time: arrival + 2 hours
-  const depDate = new Date(arrivalDate.getTime() + 120 * 60 * 1000);
-  const depHours = String(depDate.getHours()).padStart(2, '0');
-  const depMins = String(depDate.getMinutes()).padStart(2, '0');
   const depTimeInput = document.getElementById("bookDepartureTime");
-  if (depTimeInput) depTimeInput.value = `${depHours}:${depMins}`;
+  if (depTimeInput) depTimeInput.value = "";
 
   // Reset error banner
   hideBookingError();
@@ -2617,8 +2616,9 @@ function calculateBookingTotals() {
   if (sumRate) sumRate.textContent = `₹${hourlyRate} / slot / hour`;
 
   if (!arrTimeVal || !depTimeVal) {
-    if (sumDur) sumDur.textContent = "0 hours";
+    if (sumDur) sumDur.textContent = "Select arrival & departure time";
     if (sumTotal) sumTotal.textContent = "₹0";
+    if (sumFormula) sumFormula.textContent = "Formula: Slots × Hourly Rate × Duration (Select times to calculate)";
     return;
   }
 
@@ -2855,6 +2855,15 @@ function showBookingConfirmationModal(booking) {
   document.getElementById("ticketDeparture").textContent = booking.departureTime;
   document.getElementById("ticketDuration").textContent = durText;
   document.getElementById("ticketPrice").textContent = `₹${booking.totalPrice}`;
+
+  // Slot is reserved starting 15 minutes prior to booking arrival time
+  const bArrMins = parseTimeToMinutes(booking.arrivalTime);
+  const bufferStartMins = Math.max(0, bArrMins - 15);
+  const bufferH = String(Math.floor(bufferStartMins / 60)).padStart(2, '0');
+  const bufferM = String(bufferStartMins % 60).padStart(2, '0');
+  const bufferTimeStr = `${bufferH}:${bufferM}`;
+  const bufferElem = document.getElementById("ticketBufferTime");
+  if (bufferElem) bufferElem.textContent = bufferTimeStr;
 
   modal.classList.remove("hidden");
   document.body.style.overflow = "hidden";
