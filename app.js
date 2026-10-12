@@ -2410,26 +2410,127 @@ function saveBookings(bookingsList) {
   localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(bookingsList));
 }
 
-// Convert "HH:MM" or "06:00 AM" into minutes from start of day
+// Convert typed or selected time into total minutes from midnight (0 to 1439), or null if invalid
 function parseTimeToMinutes(timeStr) {
-  if (!timeStr) return 0;
-  const str = timeStr.trim();
-  // Check if standard 24h format "HH:MM"
-  if (/^\d{1,2}:\d{2}$/.test(str)) {
-    const [h, m] = str.split(":").map(Number);
-    return h * 60 + m;
-  }
-  // Check 12h format "06:00 AM"
-  const match = str.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
-  if (match) {
-    let hours = parseInt(match[1], 10);
-    const mins = parseInt(match[2], 10);
-    const meridiem = (match[3] || '').toUpperCase();
+  if (!timeStr) return null;
+  const str = String(timeStr).trim();
+  if (!str) return null;
+
+  // 1. 12-hour format with AM/PM (e.g. "11:00 PM", "1:30 AM", "11pm", "1:30am")
+  const meridiemMatch = str.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+  if (meridiemMatch) {
+    let hours = parseInt(meridiemMatch[1], 10);
+    const mins = meridiemMatch[2] ? parseInt(meridiemMatch[2], 10) : 0;
+    const meridiem = meridiemMatch[3].toUpperCase();
+    if (hours < 1 || hours > 12 || mins < 0 || mins > 59) return null;
     if (meridiem === 'PM' && hours < 12) hours += 12;
     if (meridiem === 'AM' && hours === 12) hours = 0;
     return hours * 60 + mins;
   }
-  return 0;
+
+  // 2. 24-hour format "HH:MM" or "H:MM" (e.g. "23:00", "01:30", "1:30", "9:45")
+  const match24 = str.match(/^(\d{1,2}):(\d{2})$/);
+  if (match24) {
+    const hours = parseInt(match24[1], 10);
+    const mins = parseInt(match24[2], 10);
+    if (hours >= 0 && hours <= 23 && mins >= 0 && mins <= 59) {
+      return hours * 60 + mins;
+    }
+    return null;
+  }
+
+  // 3. Single hour number (e.g. "23" or "9")
+  const singleHourMatch = str.match(/^(\d{1,2})$/);
+  if (singleHourMatch) {
+    const hours = parseInt(singleHourMatch[1], 10);
+    if (hours >= 0 && hours <= 23) {
+      return hours * 60;
+    }
+  }
+
+  return null;
+}
+
+// Format minutes from midnight into 24-hour string "HH:MM"
+function formatMinutesTo24H(totalMinutes) {
+  if (totalMinutes === null || isNaN(totalMinutes)) return "";
+  const h = Math.floor(totalMinutes / 60) % 24;
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+// Calculate duration between arrival and departure times
+// Supports same-day as well as overnight reservations crossing midnight (e.g. 23:00 to 01:30)
+function calculateBookingDuration(startMins, endMins) {
+  if (startMins === null || endMins === null) return null;
+
+  let durationMinutes = 0;
+  let isOvernight = false;
+
+  if (endMins > startMins) {
+    durationMinutes = endMins - startMins;
+    isOvernight = false;
+  } else if (endMins < startMins) {
+    // Overnight booking crossing midnight into next day
+    durationMinutes = (24 * 60 - startMins) + endMins;
+    isOvernight = true;
+  } else {
+    return {
+      durationMinutes: 0,
+      durationInHours: 0,
+      durationText: "Departure cannot be identical to arrival",
+      isOvernight: false,
+      isValid: false
+    };
+  }
+
+  const hours = Math.floor(durationMinutes / 60);
+  const minutes = durationMinutes % 60;
+
+  let durationText = "";
+  if (hours > 0 && minutes > 0) {
+    durationText = `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
+  } else if (hours > 0) {
+    durationText = `${hours} hour${hours > 1 ? 's' : ''}`;
+  } else {
+    durationText = `${minutes} minute${minutes > 1 ? 's' : ''}`;
+  }
+
+  if (isOvernight) {
+    durationText += " (Overnight)";
+  }
+
+  return {
+    durationMinutes,
+    durationInHours: durationMinutes / 60,
+    durationText,
+    isOvernight,
+    isValid: true
+  };
+}
+
+// Open native time clock picker when clock icon is clicked
+function triggerClockPicker(textInputId, pickerId) {
+  const textInput = document.getElementById(textInputId);
+  const picker = document.getElementById(pickerId);
+  if (!picker) return;
+
+  if (textInput && textInput.value) {
+    const mins = parseTimeToMinutes(textInput.value);
+    if (mins !== null) {
+      picker.value = formatMinutesTo24H(mins);
+    }
+  }
+
+  try {
+    if (typeof picker.showPicker === 'function') {
+      picker.showPicker();
+      return;
+    }
+  } catch (e) {
+    // Fallback if browser security prevents programmatic showPicker
+  }
+  picker.focus();
 }
 
 // Extract opening and closing minutes for a parking location
@@ -2440,8 +2541,8 @@ function getParkingHoursRange(timingsStr) {
   // Example format: "06:00 AM - 11:00 PM"
   const parts = timingsStr.split("-");
   if (parts.length >= 2) {
-    const openMins = parseTimeToMinutes(parts[0]);
-    const closeMins = parseTimeToMinutes(parts[1]);
+    const openMins = parseTimeToMinutes(parts[0]) || 0;
+    const closeMins = parseTimeToMinutes(parts[1]) || (24 * 60);
     return { openMins, closeMins, is24Hours: false };
   }
   return { openMins: 0, closeMins: 24 * 60, is24Hours: true };
@@ -2449,7 +2550,7 @@ function getParkingHoursRange(timingsStr) {
 
 // Calculate available slots for a specific parking lot during a specific time interval
 // Reserving slots 15 minutes prior to the booking arrival time
-function calculateAvailableSlotsForInterval(lotId, targetDateStr, startMins, endMins) {
+function calculateAvailableSlotsForInterval(lotId, targetDateStr, startMins, endMins, isOvernight = false) {
   const parkingLots = getParkingData();
   const lot = parkingLots.find(p => p.id === lotId);
   if (!lot) return 0;
@@ -2469,12 +2570,26 @@ function calculateAvailableSlotsForInterval(lotId, targetDateStr, startMins, end
     if (b.bookingDate !== targetDateStr) return false;
 
     const bArrivalMins = parseTimeToMinutes(b.arrivalTime);
-    // Booking slot is reserved 15 minutes prior to arrival time
-    const bStart = Math.max(0, bArrivalMins - 15);
-    const bEnd = parseTimeToMinutes(b.departureTime);
+    const bDepMins = parseTimeToMinutes(b.departureTime);
+    if (bArrivalMins === null || bDepMins === null) return false;
 
-    // Overlap condition: intervals overlap if max(start1, start2) < min(end1, end2)
-    return Math.max(reqStart, bStart) < Math.min(reqEnd, bEnd);
+    const bStart = Math.max(0, bArrivalMins - 15);
+    const bEnd = bDepMins;
+    const bIsOvernight = bDepMins < bArrivalMins;
+
+    if (!isOvernight && !bIsOvernight) {
+      return Math.max(reqStart, bStart) < Math.min(reqEnd, bEnd);
+    }
+
+    const reqStartDayEnd = isOvernight ? 1440 : reqEnd;
+    const bStartDayEnd = bIsOvernight ? 1440 : bEnd;
+    const eveningOverlap = Math.max(reqStart, bStart) < Math.min(reqStartDayEnd, bStartDayEnd);
+    if (eveningOverlap) return true;
+
+    if (isOvernight && bIsOvernight) {
+      return 0 < Math.min(reqEnd, bEnd);
+    }
+    return false;
   });
 
   const reservedSlots = overlappingBookings.reduce((sum, b) => sum + (Number(b.numberOfSlots) || 1), 0);
@@ -2526,12 +2641,18 @@ function openBookingModal(lotId) {
     dateInput.min = todayStr; // Prevent picking past dates in browser picker
   }
 
-  // Expected arrival and departure time must be selected manually by user
+  // Expected arrival and departure time must be selected manually or via clock
   const arrTimeInput = document.getElementById("bookArrivalTime");
   if (arrTimeInput) arrTimeInput.value = "";
 
   const depTimeInput = document.getElementById("bookDepartureTime");
   if (depTimeInput) depTimeInput.value = "";
+
+  const arrPicker = document.getElementById("bookArrivalTimePicker");
+  if (arrPicker) arrPicker.value = "";
+
+  const depPicker = document.getElementById("bookDepartureTimePicker");
+  if (depPicker) depPicker.value = "";
 
   // Reset error banner
   hideBookingError();
@@ -2573,15 +2694,43 @@ function hideBookingError() {
   }
 }
 
-// Live calculation & summary updater
+// Live calculation & summary updater for manual typing and clock selection
 function setupBookingFormLiveListeners() {
-  const fields = ["bookDate", "bookArrivalTime", "bookDepartureTime", "bookSlotsCount"];
-  fields.forEach(id => {
+  const textFields = ["bookDate", "bookArrivalTime", "bookDepartureTime", "bookSlotsCount"];
+  textFields.forEach(id => {
     const elem = document.getElementById(id);
     if (elem && !elem.dataset.listenerAttached) {
       elem.addEventListener("input", calculateBookingTotals);
+      elem.addEventListener("keyup", calculateBookingTotals);
       elem.addEventListener("change", calculateBookingTotals);
+      elem.addEventListener("blur", calculateBookingTotals);
       elem.dataset.listenerAttached = "true";
+    }
+  });
+
+  // Sync clock picker overlays with text inputs
+  const pairs = [
+    { textId: "bookArrivalTime", pickerId: "bookArrivalTimePicker" },
+    { textId: "bookDepartureTime", pickerId: "bookDepartureTimePicker" }
+  ];
+
+  pairs.forEach(({ textId, pickerId }) => {
+    const textElem = document.getElementById(textId);
+    const pickerElem = document.getElementById(pickerId);
+    if (pickerElem && textElem && !pickerElem.dataset.listenerAttached) {
+      pickerElem.addEventListener("input", () => {
+        if (pickerElem.value) {
+          textElem.value = pickerElem.value;
+          calculateBookingTotals();
+        }
+      });
+      pickerElem.addEventListener("change", () => {
+        if (pickerElem.value) {
+          textElem.value = pickerElem.value;
+          calculateBookingTotals();
+        }
+      });
+      pickerElem.dataset.listenerAttached = "true";
     }
   });
 }
@@ -2594,10 +2743,24 @@ function calculateBookingTotals() {
   if (!lot) return;
 
   const dateVal = document.getElementById("bookDate") ? document.getElementById("bookDate").value : "";
-  const arrTimeVal = document.getElementById("bookArrivalTime") ? document.getElementById("bookArrivalTime").value : "";
-  const depTimeVal = document.getElementById("bookDepartureTime") ? document.getElementById("bookDepartureTime").value : "";
+  const arrTimeVal = document.getElementById("bookArrivalTime") ? document.getElementById("bookArrivalTime").value.trim() : "";
+  const depTimeVal = document.getElementById("bookDepartureTime") ? document.getElementById("bookDepartureTime").value.trim() : "";
   const slotsVal = document.getElementById("bookSlotsCount") ? parseInt(document.getElementById("bookSlotsCount").value, 10) : 1;
   const hourlyRate = Number(lot.price || lot.twoWheelerPrice || 20);
+
+  // Parse typed / selected times
+  const startMins = parseTimeToMinutes(arrTimeVal);
+  const endMins = parseTimeToMinutes(depTimeVal);
+
+  // Sync back to picker if text is valid
+  if (startMins !== null) {
+    const arrPicker = document.getElementById("bookArrivalTimePicker");
+    if (arrPicker) arrPicker.value = formatMinutesTo24H(startMins);
+  }
+  if (endMins !== null) {
+    const depPicker = document.getElementById("bookDepartureTimePicker");
+    if (depPicker) depPicker.value = formatMinutesTo24H(endMins);
+  }
 
   // Update Summary texts
   const sumParking = document.getElementById("sumParkingName");
@@ -2611,52 +2774,52 @@ function calculateBookingTotals() {
 
   if (sumParking) sumParking.textContent = lot.name;
   if (sumSlots) sumSlots.textContent = `${slotsVal} Slot${slotsVal > 1 ? 's' : ''}`;
-  if (sumArr) sumArr.textContent = arrTimeVal ? `${dateVal} at ${arrTimeVal}` : "-";
-  if (sumDep) sumDep.textContent = depTimeVal ? `${dateVal} at ${depTimeVal}` : "-";
   if (sumRate) sumRate.textContent = `₹${hourlyRate} / slot / hour`;
 
-  if (!arrTimeVal || !depTimeVal) {
-    if (sumDur) sumDur.textContent = "Select arrival & departure time";
+  if (!arrTimeVal || !depTimeVal || startMins === null || endMins === null) {
+    if (sumArr) sumArr.textContent = arrTimeVal ? `${dateVal} at ${arrTimeVal}` : "-";
+    if (sumDep) sumDep.textContent = depTimeVal ? `${dateVal} at ${depTimeVal}` : "-";
+    if (sumDur) sumDur.textContent = "Select or type arrival & departure time";
     if (sumTotal) sumTotal.textContent = "₹0";
-    if (sumFormula) sumFormula.textContent = "Formula: Slots × Hourly Rate × Duration (Select times to calculate)";
+    if (sumFormula) sumFormula.textContent = "Formula: Slots × Hourly Rate × Duration (Type or pick times to calculate)";
     return;
   }
 
-  const startMins = parseTimeToMinutes(arrTimeVal);
-  const endMins = parseTimeToMinutes(depTimeVal);
+  const durationInfo = calculateBookingDuration(startMins, endMins);
 
-  if (endMins <= startMins) {
-    if (sumDur) sumDur.textContent = "Invalid (Departure must be after arrival)";
+  if (!durationInfo || !durationInfo.isValid) {
+    if (sumArr) sumArr.textContent = `${dateVal} at ${arrTimeVal}`;
+    if (sumDep) sumDep.textContent = `${dateVal} at ${depTimeVal}`;
+    if (sumDur) sumDur.textContent = durationInfo ? durationInfo.durationText : "Invalid times";
     if (sumTotal) sumTotal.textContent = "₹0";
     return;
   }
 
-  const durationMinutes = endMins - startMins;
-  const hours = Math.floor(durationMinutes / 60);
-  const minutes = durationMinutes % 60;
-
-  // Format Duration in hours and minutes as requested:
-  // Examples: "2 hours", "2 hours 30 minutes"
-  let durationText = "";
-  if (hours > 0 && minutes > 0) {
-    durationText = `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
-  } else if (hours > 0) {
-    durationText = `${hours} hour${hours > 1 ? 's' : ''}`;
-  } else {
-    durationText = `${minutes} minute${minutes > 1 ? 's' : ''}`;
+  // Calculate next day date for overnight departures
+  let depDisplayDate = dateVal;
+  if (durationInfo.isOvernight && dateVal) {
+    const [y, m, d] = dateVal.split("-").map(Number);
+    const nextDate = new Date(y, m - 1, d + 1);
+    const nextY = nextDate.getFullYear();
+    const nextM = String(nextDate.getMonth() + 1).padStart(2, '0');
+    const nextD = String(nextDate.getDate()).padStart(2, '0');
+    depDisplayDate = `${nextY}-${nextM}-${nextD}`;
   }
 
-  if (sumDur) sumDur.textContent = durationText;
+  if (sumArr) sumArr.textContent = `${dateVal} at ${arrTimeVal}`;
+  if (sumDep) sumDep.textContent = durationInfo.isOvernight 
+    ? `${depDisplayDate} at ${depTimeVal} (Next Day)` 
+    : `${depDisplayDate} at ${depTimeVal}`;
 
-  // Calculate Total Price:
+  if (sumDur) sumDur.textContent = durationInfo.durationText;
+
+  // Real-time calculation:
   // Total Price = Number of Slots × Parking Rate Per Hour × Parking Duration in Hours
-  // For partial hours, charge proportionally by the minute: (durationMinutes / 60)
-  const durationInHours = durationMinutes / 60;
-  const calculatedTotal = Math.round(slotsVal * hourlyRate * durationInHours);
+  const calculatedTotal = Math.round(slotsVal * hourlyRate * durationInfo.durationInHours);
 
   if (sumTotal) sumTotal.textContent = `₹${calculatedTotal}`;
   if (sumFormula) {
-    sumFormula.textContent = `Calculation: ${slotsVal} slot(s) × ₹${hourlyRate} × ${durationInHours.toFixed(2)} hrs = ₹${calculatedTotal}`;
+    sumFormula.textContent = `Calculation: ${slotsVal} slot(s) × ₹${hourlyRate} × ${durationInfo.durationInHours.toFixed(2)} hrs = ₹${calculatedTotal}`;
   }
 }
 
@@ -2669,8 +2832,8 @@ function validateBookingRules(lot, bookingData) {
   if (!bookingData.userName) return "Please enter your full name.";
   if (!bookingData.vehicleNumber) return "Please enter your vehicle registration number.";
   if (!bookingData.bookingDate) return "Please select a booking date.";
-  if (!bookingData.arrivalTime) return "Please select an arrival time.";
-  if (!bookingData.departureTime) return "Please select a departure time.";
+  if (!bookingData.arrivalTime) return "Please enter an arrival time.";
+  if (!bookingData.departureTime) return "Please enter a departure time.";
 
   // Rule 7: Do not allow a booking when the parking location is closed
   if ((lot.status || '').toUpperCase() === 'CLOSED') {
@@ -2691,8 +2854,21 @@ function validateBookingRules(lot, bookingData) {
   const startMins = parseTimeToMinutes(bookingData.arrivalTime);
   const endMins = parseTimeToMinutes(bookingData.departureTime);
 
+  if (startMins === null) return "Please enter a valid arrival time (e.g. 23:00 or 11:00 PM).";
+  if (endMins === null) return "Please enter a valid departure time (e.g. 01:30 or 01:30 AM).";
+
+  if (startMins === endMins) {
+    return "Departure time cannot be identical to arrival time.";
+  }
+
+  const durationInfo = calculateBookingDuration(startMins, endMins);
+  if (!durationInfo || !durationInfo.isValid || durationInfo.durationMinutes < 15) {
+    return "Minimum parking duration is 15 minutes.";
+  }
+
   // Parse exact arrival timestamp
-  const [arrH, arrM] = bookingData.arrivalTime.split(":").map(Number);
+  const arrH = Math.floor(startMins / 60);
+  const arrM = startMins % 60;
   const [arrYear, arrMonth, arrDay] = bookingData.bookingDate.split("-").map(Number);
   const selectedArrivalDate = new Date(arrYear, arrMonth - 1, arrDay, arrH, arrM, 0, 0);
 
@@ -2709,16 +2885,11 @@ function validateBookingRules(lot, bookingData) {
     return "Please book at least 15 minutes before your arrival time.";
   }
 
-  // Rule 4: The arrival time must be earlier than the departure time
-  if (endMins <= startMins) {
-    return "Arrival time must be earlier than departure time.";
-  }
-
-  // Rule 5: The booking must fit within the parking location's opening hours
+  // Rule 5: Arrival must be within operating hours if not 24h
   const hoursRange = getParkingHoursRange(lot.timings);
   if (!hoursRange.is24Hours) {
-    if (startMins < hoursRange.openMins || endMins > hoursRange.closeMins) {
-      return `Booking must fit within parking opening hours (${lot.timings || 'Operating hours'}).`;
+    if (startMins < hoursRange.openMins || startMins > hoursRange.closeMins) {
+      return `Arrival time must be within parking operating hours (${lot.timings || 'Operating hours'}).`;
     }
   }
 
@@ -2727,7 +2898,8 @@ function validateBookingRules(lot, bookingData) {
     lot.id,
     bookingData.bookingDate,
     startMins,
-    endMins
+    endMins,
+    durationInfo.isOvernight
   );
 
   if (bookingData.numberOfSlots > availableInInterval) {
@@ -2765,15 +2937,16 @@ function handleBookingFormSubmit(event) {
   const userName = (document.getElementById("bookUserName").value || "").trim();
   const vehicleNumber = (document.getElementById("bookVehicleNumber").value || "").trim().toUpperCase();
   const bookingDate = document.getElementById("bookDate").value;
-  const arrivalTime = document.getElementById("bookArrivalTime").value;
-  const departureTime = document.getElementById("bookDepartureTime").value;
+  const arrivalTime = (document.getElementById("bookArrivalTime").value || "").trim();
+  const departureTime = (document.getElementById("bookDepartureTime").value || "").trim();
   const numberOfSlots = parseInt(document.getElementById("bookSlotsCount").value, 10);
   const hourlyRate = Number(lot.price || lot.twoWheelerPrice || 20);
 
   const startMins = parseTimeToMinutes(arrivalTime);
   const endMins = parseTimeToMinutes(departureTime);
-  const durationMinutes = Math.max(0, endMins - startMins);
-  const durationInHours = durationMinutes / 60;
+  const durationInfo = calculateBookingDuration(startMins, endMins);
+  const durationMinutes = durationInfo ? durationInfo.durationMinutes : 0;
+  const durationInHours = durationInfo ? durationInfo.durationInHours : 0;
   const totalPrice = Math.round(numberOfSlots * hourlyRate * durationInHours);
 
   const candidateBooking = {
@@ -2797,6 +2970,10 @@ function handleBookingFormSubmit(event) {
     return;
   }
 
+  // Standardize 24h format for clean storage
+  const formattedArrival = formatMinutesTo24H(startMins) || arrivalTime;
+  const formattedDeparture = formatMinutesTo24H(endMins) || departureTime;
+
   // Create confirmed record
   const bookingId = generateNextBookingId();
   const newBooking = {
@@ -2806,8 +2983,8 @@ function handleBookingFormSubmit(event) {
     parkingId: lot.id,
     parkingName: lot.name,
     bookingDate,
-    arrivalTime,
-    departureTime,
+    arrivalTime: formattedArrival,
+    departureTime: formattedDeparture,
     numberOfSlots,
     hourlyRate,
     durationMinutes,

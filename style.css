@@ -2485,6 +2485,70 @@ body {
   }
 }
 
+/* TIME PICKER COMBO: MANUAL TYPING + CLOCK ICON PICKER */
+.time-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.time-text-input {
+  width: 100%;
+  padding-right: 48px !important;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  background-color: #ffffff;
+}
+
+.clock-symbol-wrapper {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.clock-symbol-wrapper:hover {
+  background: #e2e8f0;
+  border-color: var(--color-blue);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.clock-symbol-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.native-clock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  z-index: 3;
+}
+
 .booking-error-banner {
   background: #fef2f2;
   border: 1px solid #f87171;

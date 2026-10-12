@@ -270,15 +270,27 @@
             <!-- Arrival Time -->
             <div class="form-group">
               <label for="bookArrivalTime">Expected Arrival Time <span class="text-red">*</span></label>
-              <input type="time" id="bookArrivalTime" class="form-control" required />
-              <small class="form-hint">Rule: At least 15 mins from now</small>
+              <div class="time-picker-wrapper">
+                <input type="text" id="bookArrivalTime" class="form-control time-text-input" placeholder="e.g. 23:00 or 11:00 PM" autocomplete="off" required />
+                <div class="clock-symbol-wrapper" title="Click clock symbol to select time" onclick="triggerClockPicker('bookArrivalTime', 'bookArrivalTimePicker')">
+                  <span class="clock-symbol-icon">🕒</span>
+                  <input type="time" id="bookArrivalTimePicker" class="native-clock-overlay" tabindex="-1" />
+                </div>
+              </div>
+              <small class="form-hint">Type time directly or click 🕒 to select</small>
             </div>
 
             <!-- Departure Time -->
             <div class="form-group">
               <label for="bookDepartureTime">Expected Departure Time <span class="text-red">*</span></label>
-              <input type="time" id="bookDepartureTime" class="form-control" required />
-              <small class="form-hint">Must be after arrival time</small>
+              <div class="time-picker-wrapper">
+                <input type="text" id="bookDepartureTime" class="form-control time-text-input" placeholder="e.g. 01:30 or 01:30 AM" autocomplete="off" required />
+                <div class="clock-symbol-wrapper" title="Click clock symbol to select time" onclick="triggerClockPicker('bookDepartureTime', 'bookDepartureTimePicker')">
+                  <span class="clock-symbol-icon">🕒</span>
+                  <input type="time" id="bookDepartureTimePicker" class="native-clock-overlay" tabindex="-1" />
+                </div>
+              </div>
+              <small class="form-hint">Type time directly or click 🕒 (Supports overnight)</small>
             </div>
           </div>
 
