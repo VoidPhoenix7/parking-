@@ -97,8 +97,9 @@
         </div>
         <div class="map-legend">
           <span class="legend-item"><span class="marker-dot marker-green"></span> Available</span>
-          <span class="legend-item"><span class="marker-dot marker-yellow"></span> Limited (â‰¤10)</span>
+          <span class="legend-item"><span class="marker-dot marker-yellow"></span> Limited (≤10)</span>
           <span class="legend-item"><span class="marker-dot marker-red"></span> Full (0)</span>
+          <button id="recenterMapBtn" class="btn-map-recenter" type="button" title="Recenter map to fit all Puducherry locations">🎯 Fit All</button>
         </div>
       </div>
 
@@ -126,7 +127,7 @@
 
     <!-- Empty state message if search finds nothing -->
     <div id="noResultsMsg" class="no-results hidden">
-      <div class="no-results-icon">🔍Ž</div>
+      <div class="no-results-icon">🔍</div>
       <h3>No Parking Locations Found</h3>
       <p>Try searching for a different area like "White Town" or change your filter.</p>
     </div>
