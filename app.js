@@ -2414,13 +2414,29 @@ function renderParkingCards() {
 
 /* =========================================================
    LEAFLET & OPENSTREETMAP INTERACTIVE MAP ENGINE
-   - Centered on Puducherry city [11.9340, 79.8300]
-   - Shows 3 Real-Time Sensor parking lots & 3 Demo Samples
+   - Centered on Puducherry city
+   - Shows all verified Puducherry parking locations
    - Custom slot badges color-coded by availability
    - Interactive popups with View Details & Direct Booking
    ========================================================= */
 let leafletParkingMap = null;
 let leafletParkingMarkers = {};
+
+function fitParkingMapToBounds() {
+  if (!leafletParkingMap || typeof L === "undefined") return;
+  const parkingLots = getParkingData();
+  const validCoords = parkingLots
+    .filter(lot => typeof lot.lat === "number" && typeof lot.lng === "number")
+    .map(lot => [lot.lat, lot.lng]);
+
+  if (validCoords.length > 0) {
+    const bounds = L.latLngBounds(validCoords);
+    leafletParkingMap.fitBounds(bounds, {
+      padding: [45, 45],
+      maxZoom: 14
+    });
+  }
+}
 
 function initParkingMap() {
   const mapContainer = document.getElementById("parkingMap");
@@ -2438,9 +2454,9 @@ function initParkingMap() {
     return;
   }
 
-  // Center on Puducherry city [11.9340, 79.8300] with zoom level 13
+  // Puducherry geographic center
   leafletParkingMap = L.map("parkingMap", {
-    center: [11.9340, 79.8300],
+    center: [11.9380, 79.8280],
     zoom: 13,
     minZoom: 11,
     maxZoom: 18,
@@ -2454,20 +2470,44 @@ function initParkingMap() {
   }).addTo(leafletParkingMap);
 
   // Invalidate size once rendered in container to fix partial grey tiles
-  setTimeout(() => {
+  [150, 400, 1000].forEach(delay => {
+    setTimeout(() => {
+      if (leafletParkingMap) leafletParkingMap.invalidateSize();
+    }, delay);
+  });
+
+  window.addEventListener("resize", () => {
     if (leafletParkingMap) leafletParkingMap.invalidateSize();
-  }, 250);
+  });
+
+  // Recenter button listener
+  const recenterBtn = document.getElementById("recenterMapBtn");
+  if (recenterBtn) {
+    recenterBtn.addEventListener("click", () => {
+      fitParkingMapToBounds();
+    });
+  }
 
   updateLeafletMapMarkers();
+  fitParkingMapToBounds();
 }
 
 function updateLeafletMapMarkers() {
   if (!leafletParkingMap || typeof L === "undefined") return;
 
   const parkingLots = getParkingData();
+  const currentLotIds = new Set(parkingLots.map(l => l.id));
+
+  // Remove markers that no longer exist
+  Object.keys(leafletParkingMarkers).forEach(id => {
+    if (!currentLotIds.has(id)) {
+      leafletParkingMap.removeLayer(leafletParkingMarkers[id]);
+      delete leafletParkingMarkers[id];
+    }
+  });
 
   parkingLots.forEach(lot => {
-    if (!lot.lat || !lot.lng) return;
+    if (typeof lot.lat !== "number" || typeof lot.lng !== "number") return;
 
     let markerColor = "green";
     let statusText = "Available";
@@ -2481,7 +2521,7 @@ function updateLeafletMapMarkers() {
 
     const isClosed = (lot.status || "").toUpperCase() === "CLOSED";
 
-    // Custom Leaflet DivIcon with available slot number
+    // Custom Leaflet DivIcon with available slot number and pointing needle
     const customIcon = L.divIcon({
       className: "leaflet-custom-marker",
       html: `
@@ -2490,8 +2530,8 @@ function updateLeafletMapMarkers() {
         </div>
       `,
       iconSize: [36, 42],
-      iconAnchor: [18, 38],
-      popupAnchor: [0, -36]
+      iconAnchor: [18, 42],
+      popupAnchor: [0, -40]
     });
 
     const popupHtml = `
@@ -2534,12 +2574,17 @@ function updateLeafletMapMarkers() {
     if (leafletParkingMarkers[lot.id]) {
       leafletParkingMarkers[lot.id].setIcon(customIcon);
       leafletParkingMarkers[lot.id].setPopupContent(popupHtml);
+      leafletParkingMarkers[lot.id].setLatLng([lot.lat, lot.lng]);
     } else {
       const marker = L.marker([lot.lat, lot.lng], { icon: customIcon }).addTo(leafletParkingMap);
       marker.bindPopup(popupHtml, { maxWidth: 300, minWidth: 260 });
       leafletParkingMarkers[lot.id] = marker;
     }
   });
+
+  if (leafletParkingMap) {
+    leafletParkingMap.invalidateSize();
+  }
 }
 
 function updateMapPins() {
@@ -3415,30 +3460,23 @@ function cancelBooking(bookingId) {
 
 
 function focusParkingCard(lotId) {
-  currentParkingFilter = "all";
-  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-  const allBtn = document.querySelector('.filter-btn[data-filter="all"]');
-  if (allBtn) allBtn.classList.add("active");
-  
-  renderParkingCards();
-
-  // If Leaflet map exists, center map on this parking location and trigger popup
   const lots = getParkingData();
   const targetLot = lots.find(l => l.id === lotId);
-  if (leafletParkingMap && targetLot && targetLot.lat && targetLot.lng) {
-    leafletParkingMap.setView([targetLot.lat, targetLot.lng], 15, { animate: true });
-    if (leafletParkingMarkers[lotId]) {
-      leafletParkingMarkers[lotId].openPopup();
-    }
+
+  // Scroll map into view smoothly
+  const mapElement = document.getElementById("parkingMap");
+  if (mapElement) {
+    mapElement.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  const card = document.getElementById(`card-${lotId}`);
-  if (card) {
-    card.scrollIntoView({ behavior: "smooth", block: "center" });
-    card.classList.add("highlight-card");
+  // If Leaflet map exists, center map on this parking location and trigger popup
+  if (leafletParkingMap && targetLot && typeof targetLot.lat === "number" && typeof targetLot.lng === "number") {
+    leafletParkingMap.setView([targetLot.lat, targetLot.lng], 16, { animate: true });
     setTimeout(() => {
-      card.classList.remove("highlight-card");
-    }, 2000);
+      if (leafletParkingMarkers[lotId]) {
+        leafletParkingMarkers[lotId].openPopup();
+      }
+    }, 350);
   }
 }
 
@@ -3452,6 +3490,7 @@ function setupSearchAndFilters() {
       currentParkingSearch = e.target.value;
       if (clearBtn) clearBtn.style.display = currentParkingSearch ? "flex" : "none";
       renderParkingCards();
+      updateLeafletMapMarkers();
     });
   }
 
@@ -3461,6 +3500,7 @@ function setupSearchAndFilters() {
       currentParkingSearch = "";
       clearBtn.style.display = "none";
       renderParkingCards();
+      updateLeafletMapMarkers();
       searchInput.focus();
     });
   }
@@ -3472,6 +3512,7 @@ function setupSearchAndFilters() {
         btn.classList.add("active");
         currentParkingFilter = btn.getAttribute("data-filter");
         renderParkingCards();
+        updateLeafletMapMarkers();
       });
     });
   }
